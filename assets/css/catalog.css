@@ -1,3 +1,41 @@
+.wpb-catalog-search {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.wpb-catalog-search form {
+    display: flex;
+    gap: 10px;
+}
+
+.wpb-catalog-search input,
+.wpb-catalog-search select {
+    padding: 6px;
+}
+.wpb-catalog-search button {
+    background: #cc0000;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+.wpb-catalog-search button:hover {
+    background: #ffcc00;
+    color: #000;
+}
+
+.wpb-home-button {
+    background: #000;
+    color: #fff;
+    padding: 8px 15px;
+    text-decoration: none;
+    margin-right: 20px;
+}
+
 .wpb-catalog {
     display: flex;
     flex-wrap: wrap;
@@ -108,4 +146,15 @@
 .wpb-booking-form button[type="submit"]:hover {
     background: #ffcc00;
     color: #000;
+
+.wpb-remaining {
+    margin: 10px 0;
+    font-weight: bold;
+}
+
+.wpb-soldout {
+    margin: 10px 0;
+    color: #cc0000;
+    font-weight: bold;
+}
 }
