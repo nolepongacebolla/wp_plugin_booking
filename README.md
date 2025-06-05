@@ -1,8 +1,6 @@
 # WP Plugin Booking
 
-
 Este repositorio contiene la estructura básica de un plugin para WordPress orientado a WooCommerce. Al activarlo se crea una página llamada **Catálogo de Reservas** que usa el shortcode `[booking_catalog]` para mostrar los servicios registrados.
-
 
 ## Estructura
 
@@ -21,5 +19,4 @@ Este repositorio contiene la estructura básica de un plugin para WordPress orie
 3. Activa *WP Plugin Booking* desde el panel de administración de WordPress.
 
 Al activar el plugin se registrará el tipo de contenido **Servicio** con sus categorías y un campo de precio por persona. Además se creará una página para mostrar el catálogo que no usa la plantilla del tema, ofreciendo un diseño limpio y profesional.
-
 

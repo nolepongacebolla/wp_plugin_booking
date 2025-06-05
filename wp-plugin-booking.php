@@ -2,7 +2,6 @@
 /*
 Plugin Name: WP Plugin Booking
 Description: Sistema de reservas integrado con WooCommerce.
-
 Version: 1.0.0
 Author: Tu Nombre
 License: GPL2
@@ -43,7 +42,6 @@ function wp_plugin_booking_deactivate() {
     flush_rewrite_rules();
 }
 register_deactivation_hook( __FILE__, 'wp_plugin_booking_deactivate' );
-
 
 function wp_plugin_booking_init() {
     if ( ! class_exists( 'WooCommerce' ) ) {

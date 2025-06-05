@@ -9,4 +9,3 @@ if ( $page_id ) {
 }
 delete_option( 'wp_booking_catalog_page_id' );
 
-

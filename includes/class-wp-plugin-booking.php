@@ -91,8 +91,6 @@ class WP_Plugin_Booking {
             return WP_PLUGIN_BOOKING_PATH . 'templates/catalog-template.php';
         }
         return $template;
-      
-        add_action( 'init', array( $this, 'register_custom_post_type' ) );
     }
 
 }
