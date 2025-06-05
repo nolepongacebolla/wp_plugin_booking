@@ -1,7 +1,10 @@
+
 .wpb-catalog-search {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
+}
+
 
 .wpb-catalog {
     display: flex;
@@ -36,6 +39,7 @@
     height: auto;
     border-bottom: 3px solid #ffcc00;
 }
+
 
 .wpb-service .card {
     transition: transform 0.3s, box-shadow 0.3s;
@@ -85,3 +89,10 @@
     color: #cc0000;
     font-weight: bold;
 }
+
+.wpb-step{display:none;}
+.wpb-step.active{display:block;}
+.wpb-summary-step p{margin-bottom:10px;}
+.wpb-success{display:none;padding:20px;text-align:center;}
+.wpb-error{display:none;}
+

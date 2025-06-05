@@ -134,8 +134,10 @@ class WP_Plugin_Booking {
         $name       = isset( $_POST['name'] ) ? sanitize_text_field( $_POST['name'] ) : '';
         $email      = isset( $_POST['email'] ) ? sanitize_email( $_POST['email'] ) : '';
         $persons    = isset( $_POST['persons'] ) ? absint( $_POST['persons'] ) : 1;
+        $payment    = isset( $_POST['payment'] ) ? sanitize_text_field( $_POST['payment'] ) : '';
 
-        if ( ! $service_id || ! $name || ! $email ) {
+        if ( ! $service_id || ! $name || ! $email || ! $payment ) {
+
             wp_send_json_error();
         }
 
@@ -146,6 +148,7 @@ class WP_Plugin_Booking {
 
         $price = floatval( get_post_meta( $service_id, '_wpb_price_per_person', true ) );
         $total = $price * $persons;
+
         $booking_id = wp_insert_post( array(
             'post_type'   => 'wpb_booking',
             'post_title'  => $name,
@@ -159,6 +162,8 @@ class WP_Plugin_Booking {
             update_post_meta( $booking_id, '_wpb_persons', $persons );
             update_post_meta( $booking_id, '_wpb_total_price', $total );
             update_post_meta( $booking_id, '_wpb_status', 'pendiente' );
+            update_post_meta( $booking_id, '_wpb_payment_method', $payment );
+
             update_post_meta( $booking_id, '_wpb_booking_uid', uniqid( 'resv_' ) );
             wp_send_json_success();
         }
@@ -221,11 +226,23 @@ class WP_Plugin_Booking {
             $price     = get_post_meta( get_the_ID(), '_wpb_price_per_person', true );
             $id        = get_the_ID();
             $remaining = $this->get_remaining_capacity( $id );
+            $cats      = get_the_terms( $id, 'wpb_service_category' );
+            $excerpt   = get_the_excerpt();
+
             echo '<div class="col-md-4 mb-4 wpb-service">';
             echo '<div class="card h-100">';
             echo get_the_post_thumbnail( $id, 'medium', array( 'class' => 'card-img-top' ) );
             echo '<div class="card-body d-flex flex-column">';
+          
+            if ( $cats && ! is_wp_error( $cats ) ) {
+                $first = $cats[0];
+                echo '<span class="badge bg-secondary mb-2">' . esc_html( $first->name ) . '</span>';
+            }
             echo '<h5 class="card-title">' . esc_html( get_the_title() ) . '</h5>';
+            if ( $excerpt ) {
+                echo '<p class="card-text">' . esc_html( wp_trim_words( $excerpt, 15 ) ) . '</p>';
+            }
+
             if ( $price ) {
                 echo '<p class="wpb-price mb-1">' . wp_kses_post( wc_price( $price, array( 'currency' => 'DOP' ) ) ) . '</p>';
             }
@@ -245,10 +262,18 @@ class WP_Plugin_Booking {
             echo '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="' . esc_attr__( 'Cerrar', 'wp-plugin-booking' ) . '"></button>';
             echo '</div>';
             echo '<div class="modal-body">';
-            echo '<form class="wpb-booking-form">';
+            echo '<form class="wpb-booking-form" data-price="' . esc_attr( $price ) . '">';
             echo '<input type="hidden" name="action" value="wpb_create_booking" />';
             echo '<input type="hidden" name="nonce" value="' . esc_attr( wp_create_nonce( 'wpb_booking_nonce' ) ) . '" />';
             echo '<input type="hidden" name="service_id" value="' . esc_attr( $id ) . '" />';
+
+            echo '<div class="wpb-step">';
+            echo apply_filters( 'the_content', get_the_content() );
+            echo '<button class="btn btn-danger wpb-next mt-3">' . esc_html__( 'Siguiente', 'wp-plugin-booking' ) . '</button>';
+            echo '</div>';
+
+            echo '<div class="wpb-step">';
+
             echo '<div class="mb-3">';
             echo '<label class="form-label">' . esc_html__( 'Nombre', 'wp-plugin-booking' ) . '</label>';
             echo '<input type="text" class="form-control" name="name" required />';
@@ -257,11 +282,45 @@ class WP_Plugin_Booking {
             echo '<label class="form-label">' . esc_html__( 'Email', 'wp-plugin-booking' ) . '</label>';
             echo '<input type="email" class="form-control" name="email" required />';
             echo '</div>';
+            echo '<button class="btn btn-secondary wpb-prev me-2">' . esc_html__( 'Atrás', 'wp-plugin-booking' ) . '</button>';
+            echo '<button class="btn btn-danger wpb-next">' . esc_html__( 'Siguiente', 'wp-plugin-booking' ) . '</button>';
+            echo '</div>';
+
+            echo '<div class="wpb-step">';
+
             echo '<div class="mb-3">';
             echo '<label class="form-label">' . esc_html__( 'Personas', 'wp-plugin-booking' ) . '</label>';
             echo '<input type="number" class="form-control" name="persons" value="1" min="1" required />';
             echo '</div>';
-            echo '<button type="submit" class="btn btn-danger">' . esc_html__( 'Enviar Reserva', 'wp-plugin-booking' ) . '</button>';
+            echo '<button class="btn btn-secondary wpb-prev me-2">' . esc_html__( 'Atrás', 'wp-plugin-booking' ) . '</button>';
+            echo '<button class="btn btn-danger wpb-next">' . esc_html__( 'Siguiente', 'wp-plugin-booking' ) . '</button>';
+            echo '</div>';
+
+            echo '<div class="wpb-step">';
+            echo '<div class="mb-3">';
+            echo '<label class="form-label">' . esc_html__( 'Método de Pago', 'wp-plugin-booking' ) . '</label>';
+            echo '<div class="form-check">';
+            echo '<input class="form-check-input" type="radio" name="payment" value="transferencia" id="pay-transfer-' . esc_attr( $id ) . '" checked />';
+            echo '<label class="form-check-label" for="pay-transfer-' . esc_attr( $id ) . '">' . esc_html__( 'Transferencia', 'wp-plugin-booking' ) . '</label>';
+            echo '</div></div>';
+            echo '<button class="btn btn-secondary wpb-prev me-2">' . esc_html__( 'Atrás', 'wp-plugin-booking' ) . '</button>';
+            echo '<button class="btn btn-danger wpb-next">' . esc_html__( 'Siguiente', 'wp-plugin-booking' ) . '</button>';
+            echo '</div>';
+
+            echo '<div class="wpb-step wpb-summary-step">';
+            echo '<p><strong>' . esc_html__( 'Nombre:', 'wp-plugin-booking' ) . '</strong> <span class="wpb-summary-name"></span></p>';
+            echo '<p><strong>' . esc_html__( 'Email:', 'wp-plugin-booking' ) . '</strong> <span class="wpb-summary-email"></span></p>';
+            echo '<p><strong>' . esc_html__( 'Personas:', 'wp-plugin-booking' ) . '</strong> <span class="wpb-summary-persons"></span></p>';
+            echo '<p><strong>' . esc_html__( 'Total:', 'wp-plugin-booking' ) . '</strong> RD$ <span class="wpb-summary-total"></span></p>';
+            echo '<div class="wpb-error text-danger mb-2"></div>';
+            echo '<button class="btn btn-secondary wpb-prev me-2">' . esc_html__( 'Atrás', 'wp-plugin-booking' ) . '</button>';
+            echo '<button type="submit" class="btn btn-danger">' . esc_html__( 'Confirmar Reserva', 'wp-plugin-booking' ) . '</button>';
+            echo '</div>';
+
+            echo '<div class="wpb-step wpb-success">';
+            echo '<p class="text-success fw-bold">' . esc_html__( '¡Reserva realizada con éxito!', 'wp-plugin-booking' ) . '</p>';
+            echo '</div>';
+
             echo '</form>';
             echo '</div>';
             echo '</div></div></div>';
@@ -284,6 +343,8 @@ class WP_Plugin_Booking {
         $columns['service'] = __( 'Servicio', 'wp-plugin-booking' );
         $columns['persons'] = __( 'Cantidad', 'wp-plugin-booking' );
         $columns['total']   = __( 'Precio Total', 'wp-plugin-booking' );
+        $columns['payment'] = __( 'Pago', 'wp-plugin-booking' );
+
         $columns['status']  = __( 'Estatus', 'wp-plugin-booking' );
         $columns['uid']     = __( 'ID Único', 'wp-plugin-booking' );
         return $columns;
@@ -306,6 +367,10 @@ class WP_Plugin_Booking {
                     echo wp_kses_post( wc_price( $total, array( 'currency' => 'DOP' ) ) );
                 }
                 break;
+            case 'payment':
+                echo esc_html( get_post_meta( $post_id, '_wpb_payment_method', true ) );
+                break;
+
             case 'status':
                 echo esc_html( get_post_meta( $post_id, '_wpb_status', true ) );
                 break;

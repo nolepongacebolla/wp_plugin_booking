@@ -24,3 +24,4 @@ $bookings = get_posts( array(
 foreach ( $bookings as $booking ) {
     wp_delete_post( $booking->ID, true );
 }
+
