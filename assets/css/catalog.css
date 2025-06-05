@@ -5,6 +5,7 @@
     padding: 20px;
 }
 
+
 .wpb-catalog {
     display: flex;
     flex-wrap: wrap;
@@ -88,8 +89,10 @@
     color: #cc0000;
     font-weight: bold;
 }
+
 .wpb-step{display:none;}
 .wpb-step.active{display:block;}
 .wpb-summary-step p{margin-bottom:10px;}
 .wpb-success{display:none;padding:20px;text-align:center;}
 .wpb-error{display:none;}
+

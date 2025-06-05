@@ -137,6 +137,7 @@ class WP_Plugin_Booking {
         $payment    = isset( $_POST['payment'] ) ? sanitize_text_field( $_POST['payment'] ) : '';
 
         if ( ! $service_id || ! $name || ! $email || ! $payment ) {
+
             wp_send_json_error();
         }
 
@@ -162,6 +163,7 @@ class WP_Plugin_Booking {
             update_post_meta( $booking_id, '_wpb_total_price', $total );
             update_post_meta( $booking_id, '_wpb_status', 'pendiente' );
             update_post_meta( $booking_id, '_wpb_payment_method', $payment );
+
             update_post_meta( $booking_id, '_wpb_booking_uid', uniqid( 'resv_' ) );
             wp_send_json_success();
         }
@@ -226,10 +228,12 @@ class WP_Plugin_Booking {
             $remaining = $this->get_remaining_capacity( $id );
             $cats      = get_the_terms( $id, 'wpb_service_category' );
             $excerpt   = get_the_excerpt();
+
             echo '<div class="col-md-4 mb-4 wpb-service">';
             echo '<div class="card h-100">';
             echo get_the_post_thumbnail( $id, 'medium', array( 'class' => 'card-img-top' ) );
             echo '<div class="card-body d-flex flex-column">';
+          
             if ( $cats && ! is_wp_error( $cats ) ) {
                 $first = $cats[0];
                 echo '<span class="badge bg-secondary mb-2">' . esc_html( $first->name ) . '</span>';
@@ -238,6 +242,7 @@ class WP_Plugin_Booking {
             if ( $excerpt ) {
                 echo '<p class="card-text">' . esc_html( wp_trim_words( $excerpt, 15 ) ) . '</p>';
             }
+
             if ( $price ) {
                 echo '<p class="wpb-price mb-1">' . wp_kses_post( wc_price( $price, array( 'currency' => 'DOP' ) ) ) . '</p>';
             }
@@ -268,6 +273,7 @@ class WP_Plugin_Booking {
             echo '</div>';
 
             echo '<div class="wpb-step">';
+
             echo '<div class="mb-3">';
             echo '<label class="form-label">' . esc_html__( 'Nombre', 'wp-plugin-booking' ) . '</label>';
             echo '<input type="text" class="form-control" name="name" required />';
@@ -281,6 +287,7 @@ class WP_Plugin_Booking {
             echo '</div>';
 
             echo '<div class="wpb-step">';
+
             echo '<div class="mb-3">';
             echo '<label class="form-label">' . esc_html__( 'Personas', 'wp-plugin-booking' ) . '</label>';
             echo '<input type="number" class="form-control" name="persons" value="1" min="1" required />';
@@ -337,6 +344,7 @@ class WP_Plugin_Booking {
         $columns['persons'] = __( 'Cantidad', 'wp-plugin-booking' );
         $columns['total']   = __( 'Precio Total', 'wp-plugin-booking' );
         $columns['payment'] = __( 'Pago', 'wp-plugin-booking' );
+
         $columns['status']  = __( 'Estatus', 'wp-plugin-booking' );
         $columns['uid']     = __( 'ID Único', 'wp-plugin-booking' );
         return $columns;
@@ -362,6 +370,7 @@ class WP_Plugin_Booking {
             case 'payment':
                 echo esc_html( get_post_meta( $post_id, '_wpb_payment_method', true ) );
                 break;
+
             case 'status':
                 echo esc_html( get_post_meta( $post_id, '_wpb_status', true ) );
                 break;
