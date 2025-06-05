@@ -14,7 +14,6 @@ Este repositorio contiene la estructura básica de un plugin para WordPress orie
 ## Instalación
 
 1. Copia este directorio en la carpeta `wp-content/plugins` de tu instalación de WordPress.
-
 2. Asegúrate de tener **WooCommerce** activo.
 3. Activa *WP Plugin Booking* desde el panel de administración de WordPress.
 

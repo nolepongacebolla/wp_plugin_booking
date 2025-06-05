@@ -35,11 +35,28 @@ class WP_Plugin_Booking {
             'type'              => 'number',
             'single'            => true,
             'show_in_rest'      => true,
-            'sanitize_callback' => 'floatval',
+            'sanitize_callback' => array( $this, 'sanitize_price_meta' ),
             'auth_callback'     => function() { return current_user_can( 'edit_posts' ); },
         ) );
     }
 
+
+    /**
+     * Sanitize the price meta value.
+     *
+     * WordPress passes up to four arguments to the sanitize callback when using
+     * register_post_meta(), so we allow additional parameters.
+     *
+     * @param mixed  $value         Meta value to sanitize.
+     * @param string $meta_key      Meta key.
+     * @param string $object_type   Object type.
+     * @param string $object_subtype Optional subtype such as post type.
+     *
+     * @return float Sanitized value as float.
+     */
+    public function sanitize_price_meta( $value, $meta_key = '', $object_type = '', $object_subtype = '' ) {
+        return floatval( $value );
+    }
     public function add_price_meta_box() {
         add_meta_box(
             'wpb_service_price',
@@ -92,5 +109,4 @@ class WP_Plugin_Booking {
         }
         return $template;
     }
-
 }

@@ -57,4 +57,3 @@ add_action( 'plugins_loaded', 'wp_plugin_booking_init' );
 function wp_plugin_booking_missing_wc() {
     echo '<div class="error"><p>' . esc_html__( 'Se requiere WooCommerce para usar WP Plugin Booking.', 'wp-plugin-booking' ) . '</p></div>';
 }
-
