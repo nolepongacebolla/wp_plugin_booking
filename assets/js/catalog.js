@@ -20,8 +20,10 @@ jQuery(document).ready(function($){
                 alert('Reserva realizada');
                 form.closest('.wpb-modal').removeClass('active');
                 form[0].reset();
+                location.reload();
             }else{
-                alert('Error al reservar');
+                var msg = response.data && response.data.message ? response.data.message : 'Error al reservar';
+                alert(msg);
             }
         });
     });
