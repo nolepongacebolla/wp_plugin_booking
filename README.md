@@ -17,5 +17,7 @@ Este repositorio contiene la estructura básica de un plugin para WordPress orie
 2. Asegúrate de tener **WooCommerce** activo.
 3. Activa *WP Plugin Booking* desde el panel de administración de WordPress.
 
-Al activar el plugin se registrará el tipo de contenido **Servicio** con sus categorías y un campo de precio por persona. Además se creará una página para mostrar el catálogo que no usa la plantilla del tema, ofreciendo un diseño limpio y profesional.
 
+Al activar el plugin se registrará el tipo de contenido **Servicio** con sus categorías y un campo de precio por persona. También se crea un tipo de contenido **Reserva** para almacenar las solicitudes realizadas por los clientes.
+
+El plugin genera automáticamente una página de catálogo sin plantilla del tema donde los servicios se muestran con un diseño elegante en colores rojo, negro, amarillo y blanco. Cada servicio incluye su imagen destacada, título, costo por persona en pesos dominicanos y un botón **Reservar** que abre un modal con un formulario. Las reservas se guardan como entradas del tipo **Reserva** accesibles desde el área de administración.
