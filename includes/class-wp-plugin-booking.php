@@ -92,4 +92,5 @@ class WP_Plugin_Booking {
         }
         return $template;
     }
+
 }
