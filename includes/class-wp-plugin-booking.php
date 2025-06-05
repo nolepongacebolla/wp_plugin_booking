@@ -35,9 +35,13 @@ class WP_Plugin_Booking {
             'type'              => 'number',
             'single'            => true,
             'show_in_rest'      => true,
-            'sanitize_callback' => 'floatval',
+            'sanitize_callback' => array( $this, 'sanitize_price_meta' ),
             'auth_callback'     => function() { return current_user_can( 'edit_posts' ); },
         ) );
+    }
+
+    public function sanitize_price_meta( $value, $meta_key = '', $object_type = '' ) {
+        return floatval( $value );
     }
 
     public function add_price_meta_box() {
