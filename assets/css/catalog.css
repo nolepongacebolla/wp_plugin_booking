@@ -1,9 +1,7 @@
-
 .wpb-catalog-search {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
-}
 
 .wpb-catalog {
     display: flex;
@@ -38,7 +36,6 @@
     height: auto;
     border-bottom: 3px solid #ffcc00;
 }
-
 
 .wpb-service .card {
     transition: transform 0.3s, box-shadow 0.3s;

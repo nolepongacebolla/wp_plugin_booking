@@ -146,7 +146,6 @@ class WP_Plugin_Booking {
 
         $price = floatval( get_post_meta( $service_id, '_wpb_price_per_person', true ) );
         $total = $price * $persons;
-
         $booking_id = wp_insert_post( array(
             'post_type'   => 'wpb_booking',
             'post_title'  => $name,

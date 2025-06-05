@@ -1,4 +1,5 @@
 jQuery(document).ready(function($){
+
     $('.wpb-booking-form').on('submit', function(e){
         e.preventDefault();
         var form = $(this);
@@ -10,6 +11,7 @@ jQuery(document).ready(function($){
                 if(modal){
                     modal.hide();
                 }
+              
                 form[0].reset();
                 location.reload();
             }else{
