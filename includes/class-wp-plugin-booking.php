@@ -146,7 +146,7 @@ class WP_Plugin_Booking {
 
         $price = floatval( get_post_meta( $service_id, '_wpb_price_per_person', true ) );
         $total = $price * $persons;
-
+      
         $booking_id = wp_insert_post( array(
             'post_type'   => 'wpb_booking',
             'post_title'  => $name,
@@ -227,6 +227,7 @@ class WP_Plugin_Booking {
             } else {
                 echo '<div class="wpb-soldout">' . esc_html__( 'AGOTADO', 'wp-plugin-booking' ) . '</div>';
             }
+          
             echo '<div class="wpb-modal" id="wpb-modal-' . esc_attr( $id ) . '">';
             echo '<div class="wpb-modal-content">';
             echo '<span class="wpb-modal-close">&times;</span>';
