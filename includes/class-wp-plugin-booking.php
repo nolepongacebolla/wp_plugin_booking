@@ -40,6 +40,7 @@ class WP_Plugin_Booking {
         ) );
     }
 
+
     /**
      * Sanitize the price meta value.
      *
@@ -56,7 +57,6 @@ class WP_Plugin_Booking {
     public function sanitize_price_meta( $value, $meta_key = '', $object_type = '', $object_subtype = '' ) {
         return floatval( $value );
     }
-
     public function add_price_meta_box() {
         add_meta_box(
             'wpb_service_price',

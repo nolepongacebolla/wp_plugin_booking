@@ -18,3 +18,4 @@ Este repositorio contiene la estructura básica de un plugin para WordPress orie
 3. Activa *WP Plugin Booking* desde el panel de administración de WordPress.
 
 Al activar el plugin se registrará el tipo de contenido **Servicio** con sus categorías y un campo de precio por persona. Además se creará una página para mostrar el catálogo que no usa la plantilla del tema, ofreciendo un diseño limpio y profesional.
+
