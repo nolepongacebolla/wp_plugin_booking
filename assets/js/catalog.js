@@ -1,16 +1,4 @@
 jQuery(document).ready(function($){
-    $('.wpb-book-button').on('click', function(){
-        var id = $(this).data('service-id');
-        $('#wpb-modal-' + id).addClass('active');
-    });
-    $('.wpb-modal-close').on('click', function(){
-        $(this).closest('.wpb-modal').removeClass('active');
-    });
-    $('.wpb-modal').on('click', function(e){
-        if($(e.target).is('.wpb-modal')){
-            $(this).removeClass('active');
-        }
-    });
 
     $('.wpb-booking-form').on('submit', function(e){
         e.preventDefault();
@@ -18,7 +6,12 @@ jQuery(document).ready(function($){
         $.post(wpbCatalog.ajax_url, form.serialize(), function(response){
             if(response.success){
                 alert('Reserva realizada');
-                form.closest('.wpb-modal').removeClass('active');
+                var modalEl = form.closest('.modal')[0];
+                var modal = bootstrap.Modal.getInstance(modalEl);
+                if(modal){
+                    modal.hide();
+                }
+              
                 form[0].reset();
                 location.reload();
             }else{

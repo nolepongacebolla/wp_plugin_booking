@@ -2,39 +2,6 @@
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.wpb-catalog-search form {
-    display: flex;
-    gap: 10px;
-}
-
-.wpb-catalog-search input,
-.wpb-catalog-search select {
-    padding: 6px;
-}
-.wpb-catalog-search button {
-    background: #cc0000;
-    color: #fff;
-    border: none;
-    padding: 6px 12px;
-    cursor: pointer;
-}
-.wpb-catalog-search button:hover {
-    background: #ffcc00;
-    color: #000;
-}
-
-.wpb-home-button {
-    background: #000;
-    color: #fff;
-    padding: 8px 15px;
-    text-decoration: none;
-    margin-right: 20px;
-}
 
 .wpb-catalog {
     display: flex;
@@ -70,53 +37,13 @@
     border-bottom: 3px solid #ffcc00;
 }
 
-.wpb-book-button {
-    background: #cc0000;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    margin-top: 15px;
-    cursor: pointer;
-    display: inline-block;
+.wpb-service .card {
+    transition: transform 0.3s, box-shadow 0.3s;
 }
 
-.wpb-book-button:hover {
-    background: #ffcc00;
-    color: #000;
-}
-
-.wpb-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    z-index: 9999;
-    align-items: center;
-    justify-content: center;
-}
-
-.wpb-modal.active {
-    display: flex;
-}
-
-.wpb-modal-content {
-    background: #fff;
-    padding: 20px;
-    width: 90%;
-    max-width: 500px;
-    position: relative;
-}
-
-.wpb-modal-close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    cursor: pointer;
-    font-size: 20px;
-    color: #cc0000;
+.wpb-service .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
 .wpb-booking-form label {

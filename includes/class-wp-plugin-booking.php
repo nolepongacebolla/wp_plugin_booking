@@ -146,7 +146,6 @@ class WP_Plugin_Booking {
 
         $price = floatval( get_post_meta( $service_id, '_wpb_price_per_person', true ) );
         $total = $price * $persons;
-      
         $booking_id = wp_insert_post( array(
             'post_type'   => 'wpb_booking',
             'post_title'  => $name,
@@ -194,59 +193,82 @@ class WP_Plugin_Booking {
         $query = new WP_Query( $args );
 
         ob_start();
-        echo '<div class="wpb-catalog-search">';
-        echo '<a href="' . esc_url( home_url() ) . '" class="wpb-home-button">' . esc_html__( 'Inicio', 'wp-plugin-booking' ) . '</a>';
-        echo '<form method="get">';
-        echo '<input type="text" name="s" value="' . esc_attr( isset( $_GET['s'] ) ? $_GET['s'] : '' ) . '" placeholder="' . esc_attr__( 'Buscar servicio', 'wp-plugin-booking' ) . '" />';
+        echo '<div class="container my-4">';
+        echo '<div class="d-flex justify-content-between align-items-center mb-4 wpb-catalog-search">';
+        echo '<a href="' . esc_url( home_url() ) . '" class="btn btn-dark">' . esc_html__( 'Inicio', 'wp-plugin-booking' ) . '</a>';
+        echo '<form class="row g-2" method="get">';
+        echo '<div class="col">';
+        echo '<input type="text" class="form-control" name="s" value="' . esc_attr( isset( $_GET['s'] ) ? $_GET['s'] : '' ) . '" placeholder="' . esc_attr__( 'Buscar servicio', 'wp-plugin-booking' ) . '" />';
+        echo '</div>';
         $terms = get_terms( array( 'taxonomy' => 'wpb_service_category', 'hide_empty' => false ) );
-        echo '<select name="category"><option value="">' . esc_html__( 'Todas las categorías', 'wp-plugin-booking' ) . '</option>';
+        echo '<div class="col">';
+        echo '<select name="category" class="form-select"><option value="">' . esc_html__( 'Todas las categorías', 'wp-plugin-booking' ) . '</option>';
         foreach ( $terms as $term ) {
             $selected = selected( isset( $_GET['category'] ) ? absint( $_GET['category'] ) : '', $term->term_id, false );
             echo '<option value="' . esc_attr( $term->term_id ) . '" ' . $selected . '>' . esc_html( $term->name ) . '</option>';
         }
         echo '</select>';
-        echo '<button type="submit">' . esc_html__( 'Buscar', 'wp-plugin-booking' ) . '</button>';
+        echo '</div>';
+        echo '<div class="col-auto">';
+        echo '<button type="submit" class="btn btn-danger">' . esc_html__( 'Buscar', 'wp-plugin-booking' ) . '</button>';
+        echo '</div>';
         echo '</form>';
         echo '</div>';
 
-        echo '<div class="wpb-catalog">';
+        echo '<div class="row wpb-catalog">';
         while ( $query->have_posts() ) {
             $query->the_post();
             $price     = get_post_meta( get_the_ID(), '_wpb_price_per_person', true );
             $id        = get_the_ID();
             $remaining = $this->get_remaining_capacity( $id );
-            echo '<div class="wpb-service">';
-            echo '<div class="wpb-thumbnail">' . get_the_post_thumbnail( $id, 'medium' ) . '</div>';
-            echo '<h2>' . esc_html( get_the_title() ) . '</h2>';
+            echo '<div class="col-md-4 mb-4 wpb-service">';
+            echo '<div class="card h-100">';
+            echo get_the_post_thumbnail( $id, 'medium', array( 'class' => 'card-img-top' ) );
+            echo '<div class="card-body d-flex flex-column">';
+            echo '<h5 class="card-title">' . esc_html( get_the_title() ) . '</h5>';
             if ( $price ) {
-                echo '<div class="wpb-price">' . esc_html( wc_price( $price, array( 'currency' => 'DOP' ) ) ) . '</div>';
+                echo '<p class="wpb-price mb-1">' . wp_kses_post( wc_price( $price, array( 'currency' => 'DOP' ) ) ) . '</p>';
             }
             if ( $remaining > 0 ) {
-                echo '<div class="wpb-remaining">' . sprintf( esc_html__( 'Cupos: %d', 'wp-plugin-booking' ), $remaining ) . '</div>';
-                echo '<button class="wpb-book-button" data-service-id="' . esc_attr( $id ) . '">' . esc_html__( 'Reservar', 'wp-plugin-booking' ) . '</button>';
+                echo '<p class="wpb-remaining">' . sprintf( esc_html__( 'Cupos: %d', 'wp-plugin-booking' ), $remaining ) . '</p>';
+                echo '<button class="btn btn-danger mt-auto wpb-book-button" data-bs-toggle="modal" data-bs-target="#wpb-modal-' . esc_attr( $id ) . '" data-service-id="' . esc_attr( $id ) . '">' . esc_html__( 'Reservar', 'wp-plugin-booking' ) . '</button>';
             } else {
-                echo '<div class="wpb-soldout">' . esc_html__( 'AGOTADO', 'wp-plugin-booking' ) . '</div>';
+                echo '<span class="badge bg-danger wpb-soldout">' . esc_html__( 'AGOTADO', 'wp-plugin-booking' ) . '</span>';
             }
-          
-            echo '<div class="wpb-modal" id="wpb-modal-' . esc_attr( $id ) . '">';
-            echo '<div class="wpb-modal-content">';
-            echo '<span class="wpb-modal-close">&times;</span>';
+            echo '</div>'; // card-body
+            echo '</div>'; // card
+            echo '<div class="modal fade" id="wpb-modal-' . esc_attr( $id ) . '" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">';
+            echo '<div class="modal-dialog modal-dialog-centered">';
+            echo '<div class="modal-content">';
+            echo '<div class="modal-header">';
+            echo '<h5 class="modal-title">' . esc_html__( 'Reserva', 'wp-plugin-booking' ) . '</h5>';
+            echo '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="' . esc_attr__( 'Cerrar', 'wp-plugin-booking' ) . '"></button>';
+            echo '</div>';
+            echo '<div class="modal-body">';
             echo '<form class="wpb-booking-form">';
             echo '<input type="hidden" name="action" value="wpb_create_booking" />';
             echo '<input type="hidden" name="nonce" value="' . esc_attr( wp_create_nonce( 'wpb_booking_nonce' ) ) . '" />';
             echo '<input type="hidden" name="service_id" value="' . esc_attr( $id ) . '" />';
-            echo '<label>' . esc_html__( 'Nombre', 'wp-plugin-booking' ) . '</label>';
-            echo '<input type="text" name="name" required />';
-            echo '<label>' . esc_html__( 'Email', 'wp-plugin-booking' ) . '</label>';
-            echo '<input type="email" name="email" required />';
-            echo '<label>' . esc_html__( 'Personas', 'wp-plugin-booking' ) . '</label>';
-            echo '<input type="number" name="persons" value="1" min="1" required />';
-            echo '<button type="submit">' . esc_html__( 'Enviar Reserva', 'wp-plugin-booking' ) . '</button>';
+            echo '<div class="mb-3">';
+            echo '<label class="form-label">' . esc_html__( 'Nombre', 'wp-plugin-booking' ) . '</label>';
+            echo '<input type="text" class="form-control" name="name" required />';
+            echo '</div>';
+            echo '<div class="mb-3">';
+            echo '<label class="form-label">' . esc_html__( 'Email', 'wp-plugin-booking' ) . '</label>';
+            echo '<input type="email" class="form-control" name="email" required />';
+            echo '</div>';
+            echo '<div class="mb-3">';
+            echo '<label class="form-label">' . esc_html__( 'Personas', 'wp-plugin-booking' ) . '</label>';
+            echo '<input type="number" class="form-control" name="persons" value="1" min="1" required />';
+            echo '</div>';
+            echo '<button type="submit" class="btn btn-danger">' . esc_html__( 'Enviar Reserva', 'wp-plugin-booking' ) . '</button>';
             echo '</form>';
-            echo '</div></div>';
+            echo '</div>';
+            echo '</div></div></div>';
             echo '</div>';
         }
         wp_reset_postdata();
+        echo '</div>';
         echo '</div>';
         return ob_get_clean();
     }
@@ -281,7 +303,7 @@ class WP_Plugin_Booking {
             case 'total':
                 $total = get_post_meta( $post_id, '_wpb_total_price', true );
                 if ( $total ) {
-                    echo esc_html( wc_price( $total, array( 'currency' => 'DOP' ) ) );
+                    echo wp_kses_post( wc_price( $total, array( 'currency' => 'DOP' ) ) );
                 }
                 break;
             case 'status':
