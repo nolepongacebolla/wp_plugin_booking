@@ -48,11 +48,16 @@ jQuery(document).ready(function($){
             form.find(':hidden[required]').prop('required', false);
             $.post(wpbCatalog.ajax_url, form.serialize(), function(response){
                 if(response.success){
-                    steps.hide();
-                    form.find('.wpb-success').show();
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Reserva realizada con éxito!'
+                    }).then(function(){
+                        steps.hide();
+                        form.find('.wpb-success').show();
+                    });
                 } else {
                     var msg = response.data && response.data.message ? response.data.message : 'Error al reservar';
-                    form.find('.wpb-error').text(msg).show();
+                    Swal.fire('Error', msg, 'error');
                 }
             });
         });

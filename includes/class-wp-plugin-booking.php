@@ -19,7 +19,8 @@ class WP_Plugin_Booking {
         add_action( 'manage_wpb_booking_posts_custom_column', array( $this, 'render_booking_columns' ), 10, 2 );
 
         if ( is_admin() ) {
-            add_action( 'admin_menu', array( $this, 'add_settings_page' ) );
+            add_action( 'admin_menu', array( $this, 'register_admin_menu' ) );
+
             add_action( 'admin_init', array( $this, 'register_settings' ) );
             add_action( 'add_meta_boxes', array( $this, 'add_booking_meta_box' ) );
             add_action( 'save_post_wpb_booking', array( $this, 'save_booking_meta' ) );
@@ -28,11 +29,12 @@ class WP_Plugin_Booking {
 
     public function register_service_cpt() {
         register_post_type( 'wpb_service', array(
-            'label' => __( 'Servicio', 'wp-plugin-booking' ),
-            'public' => true,
-            'show_in_menu' => true,
-            'supports' => array( 'title', 'editor', 'thumbnail' ),
-            'rewrite' => array( 'slug' => 'servicio' ),
+            'label'       => __( 'Servicio', 'wp-plugin-booking' ),
+            'public'      => true,
+            'show_in_menu'=> 'wpbookingstandar',
+            'supports'    => array( 'title', 'editor', 'thumbnail' ),
+            'rewrite'     => array( 'slug' => 'servicio' ),
+
         ) );
 
         register_taxonomy( 'wpb_service_category', 'wpb_service', array(
@@ -64,7 +66,7 @@ class WP_Plugin_Booking {
             'label'       => __( 'Reserva', 'wp-plugin-booking' ),
             'public'      => false,
             'show_ui'     => true,
-            'show_in_menu'=> true,
+            'show_in_menu'=> 'wpbookingstandar',
             'supports'    => array( 'title' ),
         ) );
     }
@@ -182,6 +184,10 @@ class WP_Plugin_Booking {
 
     public function booking_catalog_shortcode() {
         wp_enqueue_style( 'wpb-catalog', WP_PLUGIN_BOOKING_URL . 'assets/css/catalog.css', array(), WP_PLUGIN_BOOKING_VERSION );
+        $custom_css = get_option( 'wpb_catalog_custom_css', '' );
+        if ( $custom_css ) {
+            wp_add_inline_style( 'wpb-catalog', $custom_css );
+        }
         wp_enqueue_script( 'wpb-catalog', WP_PLUGIN_BOOKING_URL . 'assets/js/catalog.js', array( 'jquery' ), WP_PLUGIN_BOOKING_VERSION, true );
         wp_localize_script( 'wpb-catalog', 'wpbCatalog', array(
             'ajax_url' => admin_url( 'admin-ajax.php' ),
@@ -237,7 +243,7 @@ class WP_Plugin_Booking {
             $remaining = $this->get_remaining_capacity( $id );
             $cats      = get_the_terms( $id, 'wpb_service_category' );
             $excerpt   = get_the_excerpt();
-          
+
             echo '<div class="col-md-4 mb-4 wpb-service">';
             echo '<div class="card h-100">';
             echo get_the_post_thumbnail( $id, 'medium', array( 'class' => 'card-img-top' ) );
@@ -319,7 +325,6 @@ class WP_Plugin_Booking {
                 echo '</div>';
             }
             echo '</div>';
-
             echo '<button class="btn btn-secondary wpb-prev me-2">' . esc_html__( 'Atrás', 'wp-plugin-booking' ) . '</button>';
             echo '<button class="btn btn-danger wpb-next">' . esc_html__( 'Siguiente', 'wp-plugin-booking' ) . '</button>';
             echo '</div>';
@@ -407,12 +412,25 @@ class WP_Plugin_Booking {
             'default'           => 'transferencia',
         ) );
 
+        register_setting( 'wpb_settings_group', 'wpb_catalog_custom_css', array(
+            'sanitize_callback' => array( $this, 'sanitize_custom_css' ),
+            'default'           => '',
+        ) );
+
         add_settings_section( 'wpb_main', __( 'Ajustes Generales', 'wp-plugin-booking' ), null, 'wpb-settings' );
 
         add_settings_field(
             'wpb_payment_methods',
             __( 'Métodos de pago (separados por coma)', 'wp-plugin-booking' ),
             array( $this, 'payment_methods_field' ),
+            'wpb-settings',
+            'wpb_main'
+        );
+
+        add_settings_field(
+            'wpb_catalog_custom_css',
+            __( 'CSS Personalizado para el Catálogo', 'wp-plugin-booking' ),
+            array( $this, 'custom_css_field' ),
             'wpb-settings',
             'wpb_main'
         );
@@ -427,16 +445,19 @@ class WP_Plugin_Booking {
     }
 
     /**
-     * Add settings page under Settings menu.
+     * Render custom CSS textarea field.
      */
-    public function add_settings_page() {
-        add_options_page(
-            __( 'Ajustes de Booking', 'wp-plugin-booking' ),
-            __( 'Booking', 'wp-plugin-booking' ),
-            'manage_options',
-            'wpb-settings',
-            array( $this, 'render_settings_page' )
-        );
+    public function custom_css_field() {
+        $value = get_option( 'wpb_catalog_custom_css', '' );
+        echo '<textarea name="wpb_catalog_custom_css" rows="10" cols="50" class="large-text code">' . esc_textarea( $value ) . '</textarea>';
+    }
+
+    /**
+     * Sanitize custom CSS before saving.
+     */
+    public function sanitize_custom_css( $css ) {
+        return wp_kses_post( $css );
+
     }
 
     /**
@@ -547,5 +568,35 @@ class WP_Plugin_Booking {
         if ( isset( $_POST['wpb_status'] ) ) {
             update_post_meta( $post_id, '_wpb_status', sanitize_text_field( $_POST['wpb_status'] ) );
         }
+    }
+    /**
+     * Register top level admin menu and settings submenu.
+     */
+    public function register_admin_menu() {
+        add_menu_page(
+            __( 'WPBookingStandar', 'wp-plugin-booking' ),
+            'WPBookingStandar',
+            'manage_options',
+            'wpbookingstandar',
+            array( $this, 'menu_redirect' ),
+            'dashicons-calendar-alt'
+        );
+
+        add_submenu_page(
+            'wpbookingstandar',
+            __( 'Ajustes', 'wp-plugin-booking' ),
+            __( 'Ajustes', 'wp-plugin-booking' ),
+            'manage_options',
+            'wpb-settings',
+            array( $this, 'render_settings_page' )
+        );
+    }
+
+    /**
+     * Redirect top level menu to services list.
+     */
+    public function menu_redirect() {
+        wp_safe_redirect( admin_url( 'edit.php?post_type=wpb_service' ) );
+        exit;
     }
 }
