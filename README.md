@@ -28,3 +28,4 @@ Cada servicio puede definirse desde varias cajas de metadatos para facilitar su 
 Se añadieron animaciones suaves entre pasos del formulario, se utiliza **SweetAlert** para mostrar la confirmación de la reserva y se valida la creación de reservas mostrando mensajes de error descriptivos. Las reservas pueden editarse desde su pantalla de edición incluyendo el estatus y el método de pago. Además es posible añadir código CSS personalizado para el catálogo desde la página de ajustes.
 El sistema envía un correo al cliente cuando crea una reserva y cada vez que se actualiza su estatus. El contenido de ese correo puede modificarse con HTML desde **WPBookingStandar → Ajustes**.
 Dentro del menú **WPBookingStandar** hay una sección de **Estadísticas** que muestra el total de reservas y las ganancias acumuladas.
+

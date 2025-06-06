@@ -405,6 +405,7 @@ class WP_Plugin_Booking {
                 echo '<span class="badge bg-secondary mb-2">' . esc_html( $first->name ) . '</span>';
             }
             echo '<h5 class="card-title">' . esc_html( get_the_title() ) . '</h5>';
+
             if ( $price ) {
                 $price_html = function_exists( 'wc_price' )
                     ? wc_price( $price, array( 'currency' => 'DOP' ) )
@@ -420,6 +421,7 @@ class WP_Plugin_Booking {
             echo '</div>'; // card-body
             echo '</div>'; // card
             echo '<div class="modal fade" id="wpb-modal-' . esc_attr( $id ) . '" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">';
+
             echo '<div class="modal-dialog modal-dialog-centered modal-lg">';
             echo '<div class="modal-content">';
             echo '<div class="modal-header">';
@@ -428,6 +430,7 @@ class WP_Plugin_Booking {
             echo '</div>';
             echo '<div class="modal-body">';
             echo '<form class="wpb-booking-form" data-price="' . esc_attr( $price ) . '" data-discount="' . esc_attr( $discount ) . '" data-discountmin="' . esc_attr( $disc_min ) . '">';
+
             echo '<input type="hidden" name="action" value="wpb_create_booking" />';
             echo '<input type="hidden" name="nonce" value="' . esc_attr( wp_create_nonce( 'wpb_booking_nonce' ) ) . '" />';
             echo '<input type="hidden" name="service_id" value="' . esc_attr( $id ) . '" />';
@@ -443,6 +446,7 @@ class WP_Plugin_Booking {
                         $full_url  = $full ? $full[0] : $thumb[0];
                         echo '<img src="' . esc_url( $thumb[0] ) . '" data-full="' . esc_url( $full_url ) . '" class="img-fluid mb-2 me-2 wpb-expand-image" style="cursor:pointer;" />';
                     }
+
                 }
             }
             if ( $video ) {
@@ -469,6 +473,7 @@ class WP_Plugin_Booking {
             echo '<input type="text" class="form-control" name="phone" required />';
             echo '</div>';
             echo '<div class="mb-3">';
+
             echo '<label class="form-label">' . esc_html__( 'Email', 'wp-plugin-booking' ) . '</label>';
             echo '<input type="email" class="form-control" name="email" required />';
             echo '</div>';
