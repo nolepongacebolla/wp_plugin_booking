@@ -147,7 +147,6 @@ class WP_Plugin_Booking {
 
         $price = floatval( get_post_meta( $service_id, '_wpb_price_per_person', true ) );
         $total = $price * $persons;
-
         $booking_id = wp_insert_post(
             array(
                 'post_type'   => 'wpb_booking',
@@ -165,6 +164,7 @@ class WP_Plugin_Booking {
             update_post_meta( $booking_id, '_wpb_total_price', $total );
             update_post_meta( $booking_id, '_wpb_status', 'pendiente' );
             update_post_meta( $booking_id, '_wpb_payment_method', $payment );
+
             update_post_meta( $booking_id, '_wpb_booking_uid', uniqid( 'resv_' ) );
             wp_send_json_success();
         }
@@ -230,10 +230,12 @@ class WP_Plugin_Booking {
             $remaining = $this->get_remaining_capacity( $id );
             $cats      = get_the_terms( $id, 'wpb_service_category' );
             $excerpt   = get_the_excerpt();
+          
             echo '<div class="col-md-4 mb-4 wpb-service">';
             echo '<div class="card h-100">';
             echo get_the_post_thumbnail( $id, 'medium', array( 'class' => 'card-img-top' ) );
             echo '<div class="card-body d-flex flex-column">';
+
             if ( $cats && ! is_wp_error( $cats ) ) {
                 $first = $cats[0];
                 echo '<span class="badge bg-secondary mb-2">' . esc_html( $first->name ) . '</span>';
@@ -242,6 +244,7 @@ class WP_Plugin_Booking {
             if ( $excerpt ) {
                 echo '<p class="card-text">' . esc_html( wp_trim_words( $excerpt, 15 ) ) . '</p>';
             }
+          
             if ( $price ) {
                 $price_html = function_exists( 'wc_price' )
                     ? wc_price( $price, array( 'currency' => 'DOP' ) )
