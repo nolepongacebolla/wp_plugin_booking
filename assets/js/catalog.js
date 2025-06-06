@@ -4,13 +4,23 @@ jQuery(document).ready(function($){
         var steps = form.find('.wpb-step');
         var current = 0;
         function showStep(i){
-            steps.removeClass('active').hide().eq(i).addClass('active').show();
+            steps.removeClass('active').hide();
+            steps.eq(i).addClass('active').show();
         }
         showStep(0);
 
         form.on('click', '.wpb-next', function(e){
             e.preventDefault();
-            if(current < steps.length - 1){
+            var step = steps.eq(current);
+            var valid = true;
+            step.find(':input[required]').each(function(){
+                if(!this.checkValidity()){
+                    this.reportValidity();
+                    valid = false;
+                    return false;
+                }
+            });
+            if(valid && current < steps.length - 1){
                 current++;
                 if(form.find('.wpb-step').eq(current).hasClass('wpb-summary-step')){
                     var price = parseFloat(form.data('price')) || 0;
@@ -35,6 +45,7 @@ jQuery(document).ready(function($){
 
         form.on('submit', function(e){
             e.preventDefault();
+            form.find(':hidden[required]').prop('required', false);
             $.post(wpbCatalog.ajax_url, form.serialize(), function(response){
                 if(response.success){
                     steps.hide();

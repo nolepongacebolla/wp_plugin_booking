@@ -17,6 +17,13 @@ class WP_Plugin_Booking {
         add_action( 'wp_ajax_nopriv_wpb_create_booking', array( $this, 'handle_create_booking' ) );
         add_filter( 'manage_wpb_booking_posts_columns', array( $this, 'booking_columns' ) );
         add_action( 'manage_wpb_booking_posts_custom_column', array( $this, 'render_booking_columns' ), 10, 2 );
+
+        if ( is_admin() ) {
+            add_action( 'admin_menu', array( $this, 'add_settings_page' ) );
+            add_action( 'admin_init', array( $this, 'register_settings' ) );
+            add_action( 'add_meta_boxes', array( $this, 'add_booking_meta_box' ) );
+            add_action( 'save_post_wpb_booking', array( $this, 'save_booking_meta' ) );
+        }
     }
 
     public function register_service_cpt() {
@@ -147,6 +154,7 @@ class WP_Plugin_Booking {
 
         $price = floatval( get_post_meta( $service_id, '_wpb_price_per_person', true ) );
         $total = $price * $persons;
+
         $booking_id = wp_insert_post(
             array(
                 'post_type'   => 'wpb_booking',
@@ -164,7 +172,6 @@ class WP_Plugin_Booking {
             update_post_meta( $booking_id, '_wpb_total_price', $total );
             update_post_meta( $booking_id, '_wpb_status', 'pendiente' );
             update_post_meta( $booking_id, '_wpb_payment_method', $payment );
-
             update_post_meta( $booking_id, '_wpb_booking_uid', uniqid( 'resv_' ) );
             wp_send_json_success();
         }
@@ -235,7 +242,6 @@ class WP_Plugin_Booking {
             echo '<div class="card h-100">';
             echo get_the_post_thumbnail( $id, 'medium', array( 'class' => 'card-img-top' ) );
             echo '<div class="card-body d-flex flex-column">';
-
             if ( $cats && ! is_wp_error( $cats ) ) {
                 $first = $cats[0];
                 echo '<span class="badge bg-secondary mb-2">' . esc_html( $first->name ) . '</span>';
@@ -244,7 +250,7 @@ class WP_Plugin_Booking {
             if ( $excerpt ) {
                 echo '<p class="card-text">' . esc_html( wp_trim_words( $excerpt, 15 ) ) . '</p>';
             }
-          
+
             if ( $price ) {
                 $price_html = function_exists( 'wc_price' )
                     ? wc_price( $price, array( 'currency' => 'DOP' ) )
@@ -302,10 +308,18 @@ class WP_Plugin_Booking {
             echo '<div class="wpb-step">';
             echo '<div class="mb-3">';
             echo '<label class="form-label">' . esc_html__( 'Método de Pago', 'wp-plugin-booking' ) . '</label>';
-            echo '<div class="form-check">';
-            echo '<input class="form-check-input" type="radio" name="payment" value="transferencia" id="pay-transfer-' . esc_attr( $id ) . '" checked />';
-            echo '<label class="form-check-label" for="pay-transfer-' . esc_attr( $id ) . '">' . esc_html__( 'Transferencia', 'wp-plugin-booking' ) . '</label>';
-            echo '</div></div>';
+            $methods = get_option( 'wpb_payment_methods', 'transferencia' );
+            $methods = array_map( 'trim', explode( ',', $methods ) );
+            foreach ( $methods as $index => $method ) {
+                $mid     = sanitize_title( $method ) . '-' . $index . '-' . $id;
+                $checked = 0 === $index ? ' checked' : '';
+                echo '<div class="form-check">';
+                echo '<input class="form-check-input" type="radio" name="payment" value="' . esc_attr( $method ) . '" id="' . esc_attr( $mid ) . '"' . $checked . ' />';
+                echo '<label class="form-check-label" for="' . esc_attr( $mid ) . '">' . esc_html( $method ) . '</label>';
+                echo '</div>';
+            }
+            echo '</div>';
+
             echo '<button class="btn btn-secondary wpb-prev me-2">' . esc_html__( 'Atrás', 'wp-plugin-booking' ) . '</button>';
             echo '<button class="btn btn-danger wpb-next">' . esc_html__( 'Siguiente', 'wp-plugin-booking' ) . '</button>';
             echo '</div>';
@@ -381,6 +395,157 @@ class WP_Plugin_Booking {
             case 'uid':
                 echo esc_html( get_post_meta( $post_id, '_wpb_booking_uid', true ) );
                 break;
+        }
+    }
+
+    /**
+     * Register plugin settings.
+     */
+    public function register_settings() {
+        register_setting( 'wpb_settings_group', 'wpb_payment_methods', array(
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'transferencia',
+        ) );
+
+        add_settings_section( 'wpb_main', __( 'Ajustes Generales', 'wp-plugin-booking' ), null, 'wpb-settings' );
+
+        add_settings_field(
+            'wpb_payment_methods',
+            __( 'Métodos de pago (separados por coma)', 'wp-plugin-booking' ),
+            array( $this, 'payment_methods_field' ),
+            'wpb-settings',
+            'wpb_main'
+        );
+    }
+
+    /**
+     * Render payment methods field.
+     */
+    public function payment_methods_field() {
+        $value = get_option( 'wpb_payment_methods', 'transferencia' );
+        echo '<input type="text" name="wpb_payment_methods" value="' . esc_attr( $value ) . '" class="regular-text" />';
+    }
+
+    /**
+     * Add settings page under Settings menu.
+     */
+    public function add_settings_page() {
+        add_options_page(
+            __( 'Ajustes de Booking', 'wp-plugin-booking' ),
+            __( 'Booking', 'wp-plugin-booking' ),
+            'manage_options',
+            'wpb-settings',
+            array( $this, 'render_settings_page' )
+        );
+    }
+
+    /**
+     * Output settings page markup.
+     */
+    public function render_settings_page() {
+        echo '<div class="wrap">';
+        echo '<h1>' . esc_html__( 'Ajustes de Booking', 'wp-plugin-booking' ) . '</h1>';
+        echo '<form method="post" action="options.php">';
+        settings_fields( 'wpb_settings_group' );
+        do_settings_sections( 'wpb-settings' );
+        submit_button();
+        echo '</form></div>';
+    }
+
+    /**
+     * Add meta box to edit bookings.
+     */
+    public function add_booking_meta_box() {
+        add_meta_box(
+            'wpb_booking_details',
+            __( 'Detalles de la Reserva', 'wp-plugin-booking' ),
+            array( $this, 'render_booking_meta_box' ),
+            'wpb_booking',
+            'normal',
+            'default'
+        );
+    }
+
+    /**
+     * Render booking meta box fields.
+     */
+    public function render_booking_meta_box( $post ) {
+        wp_nonce_field( 'wpb_save_booking_meta', 'wpb_booking_nonce' );
+        $service_id = get_post_meta( $post->ID, '_wpb_service_id', true );
+        $name       = get_post_meta( $post->ID, '_wpb_customer_name', true );
+        $email      = get_post_meta( $post->ID, '_wpb_customer_email', true );
+        $persons    = get_post_meta( $post->ID, '_wpb_persons', true );
+        $total      = get_post_meta( $post->ID, '_wpb_total_price', true );
+        $payment    = get_post_meta( $post->ID, '_wpb_payment_method', true );
+        $status     = get_post_meta( $post->ID, '_wpb_status', true );
+
+        echo '<p><label>' . esc_html__( 'Servicio', 'wp-plugin-booking' ) . '</label><br />';
+        wp_dropdown_pages( array(
+            'post_type'        => 'wpb_service',
+            'selected'         => $service_id,
+            'name'            => 'wpb_service_id',
+            'show_option_none' => __( 'Seleccionar', 'wp-plugin-booking' ),
+        ) );
+        echo '</p>';
+
+        echo '<p><label>' . esc_html__( 'Nombre', 'wp-plugin-booking' ) . '</label><br />';
+        echo '<input type="text" name="wpb_customer_name" value="' . esc_attr( $name ) . '" class="regular-text" /></p>';
+
+        echo '<p><label>' . esc_html__( 'Email', 'wp-plugin-booking' ) . '</label><br />';
+        echo '<input type="email" name="wpb_customer_email" value="' . esc_attr( $email ) . '" class="regular-text" /></p>';
+
+        echo '<p><label>' . esc_html__( 'Personas', 'wp-plugin-booking' ) . '</label><br />';
+        echo '<input type="number" name="wpb_persons" value="' . esc_attr( $persons ) . '" /></p>';
+
+        echo '<p><label>' . esc_html__( 'Total', 'wp-plugin-booking' ) . '</label><br />';
+        echo '<input type="number" step="0.01" name="wpb_total_price" value="' . esc_attr( $total ) . '" /></p>';
+
+        $methods = get_option( 'wpb_payment_methods', 'transferencia' );
+        $methods = array_map( 'trim', explode( ',', $methods ) );
+        echo '<p><label>' . esc_html__( 'Pago', 'wp-plugin-booking' ) . '</label><br />';
+        echo '<select name="wpb_payment_method">';
+        foreach ( $methods as $method ) {
+            echo '<option value="' . esc_attr( $method ) . '"' . selected( $payment, $method, false ) . '>' . esc_html( $method ) . '</option>';
+        }
+        echo '</select></p>';
+
+        $statuses = array( 'pendiente', 'confirmado', 'cancelado' );
+        echo '<p><label>' . esc_html__( 'Estatus', 'wp-plugin-booking' ) . '</label><br />';
+        echo '<select name="wpb_status">';
+        foreach ( $statuses as $st ) {
+            echo '<option value="' . esc_attr( $st ) . '"' . selected( $status, $st, false ) . '>' . esc_html( ucfirst( $st ) ) . '</option>';
+        }
+        echo '</select></p>';
+    }
+
+    /**
+     * Save booking meta when editing in admin.
+     */
+    public function save_booking_meta( $post_id ) {
+        if ( ! isset( $_POST['wpb_booking_nonce'] ) || ! wp_verify_nonce( $_POST['wpb_booking_nonce'], 'wpb_save_booking_meta' ) ) {
+            return;
+        }
+
+        if ( isset( $_POST['wpb_service_id'] ) ) {
+            update_post_meta( $post_id, '_wpb_service_id', absint( $_POST['wpb_service_id'] ) );
+        }
+        if ( isset( $_POST['wpb_customer_name'] ) ) {
+            update_post_meta( $post_id, '_wpb_customer_name', sanitize_text_field( $_POST['wpb_customer_name'] ) );
+        }
+        if ( isset( $_POST['wpb_customer_email'] ) ) {
+            update_post_meta( $post_id, '_wpb_customer_email', sanitize_email( $_POST['wpb_customer_email'] ) );
+        }
+        if ( isset( $_POST['wpb_persons'] ) ) {
+            update_post_meta( $post_id, '_wpb_persons', absint( $_POST['wpb_persons'] ) );
+        }
+        if ( isset( $_POST['wpb_total_price'] ) ) {
+            update_post_meta( $post_id, '_wpb_total_price', floatval( $_POST['wpb_total_price'] ) );
+        }
+        if ( isset( $_POST['wpb_payment_method'] ) ) {
+            update_post_meta( $post_id, '_wpb_payment_method', sanitize_text_field( $_POST['wpb_payment_method'] ) );
+        }
+        if ( isset( $_POST['wpb_status'] ) ) {
+            update_post_meta( $post_id, '_wpb_status', sanitize_text_field( $_POST['wpb_status'] ) );
         }
     }
 }
