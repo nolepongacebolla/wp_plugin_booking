@@ -137,7 +137,6 @@ class WP_Plugin_Booking {
         $payment    = isset( $_POST['payment'] ) ? sanitize_text_field( $_POST['payment'] ) : '';
 
         if ( ! $service_id || ! $name || ! $email || ! $payment ) {
-
             wp_send_json_error();
         }
 
@@ -148,14 +147,16 @@ class WP_Plugin_Booking {
 
         $price = floatval( get_post_meta( $service_id, '_wpb_price_per_person', true ) );
         $total = $price * $persons;
+        $booking_id = wp_insert_post(
+            array(
+                'post_type'   => 'wpb_booking',
+                'post_title'  => $name,
+                'post_status' => 'publish',
+            ),
+            true
+        );
 
-        $booking_id = wp_insert_post( array(
-            'post_type'   => 'wpb_booking',
-            'post_title'  => $name,
-            'post_status' => 'publish',
-        ) );
-
-        if ( $booking_id ) {
+        if ( ! is_wp_error( $booking_id ) && $booking_id ) {
             update_post_meta( $booking_id, '_wpb_service_id', $service_id );
             update_post_meta( $booking_id, '_wpb_customer_name', $name );
             update_post_meta( $booking_id, '_wpb_customer_email', $email );
@@ -168,30 +169,24 @@ class WP_Plugin_Booking {
             wp_send_json_success();
         }
 
-        wp_send_json_error();
+        $message = is_wp_error( $booking_id ) ? $booking_id->get_error_message() : __( 'Error al procesar la reserva', 'wp-plugin-booking' );
+        wp_send_json_error( array( 'message' => $message ) );
     }
 
     public function booking_catalog_shortcode() {
-        // Registrar estilos y scripts
         wp_enqueue_style( 'wpb-catalog', WP_PLUGIN_BOOKING_URL . 'assets/css/catalog.css', array(), WP_PLUGIN_BOOKING_VERSION );
         wp_enqueue_script( 'wpb-catalog', WP_PLUGIN_BOOKING_URL . 'assets/js/catalog.js', array( 'jquery' ), WP_PLUGIN_BOOKING_VERSION, true );
-        
-        // Localizar el script con datos necesarios
         wp_localize_script( 'wpb-catalog', 'wpbCatalog', array(
             'ajax_url' => admin_url( 'admin-ajax.php' ),
             'nonce'    => wp_create_nonce( 'wpb_booking_nonce' ),
         ) );
 
-        // Argumentos para la consulta de servicios
         $args = array(
             'post_type'      => 'wpb_service',
             'posts_per_page' => -1,
             's'              => isset( $_GET['s'] ) ? sanitize_text_field( $_GET['s'] ) : '',
-            'orderby'        => 'title',
-            'order'          => 'ASC',
         );
 
-        // Filtrar por categoría si se especifica
         if ( ! empty( $_GET['category'] ) ) {
             $args['tax_query'] = array(
                 array(
@@ -202,138 +197,10 @@ class WP_Plugin_Booking {
             );
         }
 
-
-        // Obtener categorías para el filtro
-        $categories = get_terms( array(
-            'taxonomy'   => 'wpb_service_category',
-            'hide_empty' => true,
-        ) );
-
         $query = new WP_Query( $args );
 
         ob_start();
-        ?>
-        <div class="wpb-catalog-container">
-            <!-- Encabezado con título y búsqueda -->
-            <header class="wpb-header text-center py-5 mb-5">
-                <div class="container">
-                    <h1 class="display-4 mb-4">Nuestros Servicios</h1>
-                    <p class="lead mb-4">Descubre y reserva nuestros servicios exclusivos</p>
-                    
-                    <!-- Formulario de búsqueda -->
-                    <div class="wpb-search-container">
-                        <form class="wpb-search-form" method="get" action="">
-                            <input type="hidden" name="post_type" value="wpb_service">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="fas fa-search"></i></span>
-                                        <input 
-                                            type="text" 
-                                            class="form-control" 
-                                            name="s" 
-                                            placeholder="Buscar servicios..." 
-                                            value="<?php echo isset( $_GET['s'] ) ? esc_attr( $_GET['s'] ) : ''; ?>"
-                                        >
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <select class="form-select" name="category">
-                                        <option value="">Todas las categorías</option>
-                                        <?php foreach ( $categories as $category ) : ?>
-                                            <option value="<?php echo esc_attr( $category->term_id ); ?>" <?php selected( isset( $_GET['category'] ) && $_GET['category'] == $category->term_id ); ?>>
-                                                <?php echo esc_html( $category->name ); ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <button type="submit" class="btn btn-primary w-100">
-                                        <i class="fas fa-filter me-2"></i>Filtrar
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Listado de servicios -->
-            <div class="container">
-                <?php if ( $query->have_posts() ) : ?>
-                    <div class="wpb-catalog">
-                        <?php while ( $query->have_posts() ) : $query->the_post(); 
-                            $service_id = get_the_ID();
-                            $price = get_post_meta( $service_id, '_wpb_price_per_person', true );
-                            $capacity = get_post_meta( $service_id, '_wpb_capacity', true );
-                            $remaining = $this->get_remaining_capacity( $service_id );
-                            $is_available = $remaining > 0;
-                            $thumbnail = get_the_post_thumbnail_url( $service_id, 'large' ) ?: 'https://via.placeholder.com/800x500?text=Sin+imagen';
-                            $categories = get_the_terms( $service_id, 'wpb_service_category' );
-                            $category_names = $categories ? wp_list_pluck( $categories, 'name' ) : array();
-                        ?>
-                            <div class="wpb-service" data-service-id="<?php echo esc_attr( $service_id ); ?>" 
-                                 data-service-title="<?php echo esc_attr( get_the_title() ); ?>" 
-                                 data-service-price="<?php echo esc_attr( $price ); ?>" 
-                                 data-remaining="<?php echo esc_attr( $remaining ); ?>">
-                                <div class="wpb-thumbnail">
-                                    <img src="<?php echo esc_url( $thumbnail ); ?>" alt="<?php the_title_attribute(); ?>" class="img-fluid">
-                                    <?php if ( $category_names ) : ?>
-                                        <div class="wpb-categories">
-                                            <?php echo esc_html( implode( ', ', $category_names ) ); ?>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="wpb-service-content">
-                                    <h2><?php the_title(); ?></h2>
-                                    <div class="wpb-excerpt">
-                                        <?php echo wp_trim_words( get_the_excerpt(), 20, '...' ); ?>
-                                    </div>
-                                    <div class="wpb-meta">
-                                        <?php if ( $price ) : ?>
-                                            <div class="wpb-price">
-                                                <?php echo esc_html( number_format( $price, 2, ',', '.' ) ); ?> €/persona
-                                            </div>
-                                        <?php endif; ?>
-                                        <div class="wpb-availability">
-                                            <?php if ( $is_available ) : ?>
-                                                <span class="text-success">
-                                                    <i class="fas fa-check-circle me-1"></i>
-                                                    <?php echo sprintf( _n( '%d plaza disponible', '%d plazas disponibles', $remaining, 'wp-plugin-booking' ), $remaining ); ?>
-                                                </span>
-                                            <?php else : ?>
-                                                <span class="text-danger">
-                                                    <i class="fas fa-times-circle me-1"></i>
-                                                    <?php esc_html_e( 'Agotado', 'wp-plugin-booking' ); ?>
-                                                </span>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                    <div class="wpb-actions mt-3">
-                                        <a href="<?php the_permalink(); ?>" class="btn btn-outline-primary me-2">
-                                            <i class="fas fa-info-circle me-1"></i>Más info
-                                        </a>
-                                        <button class="btn btn-primary wpb-book-now" <?php echo ! $is_available ? 'disabled' : ''; ?> 
-                                                data-service-id="<?php echo esc_attr( $service_id ); ?>">
-                                            <i class="fas fa-calendar-check me-1"></i>
-                                            <?php echo $is_available ? 'Reservar ahora' : 'Agotado'; ?>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endwhile; ?>
-                        <?php wp_reset_postdata(); ?>
-                    </div>
-                <?php else : ?>
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <?php esc_html_e( 'No se encontraron servicios que coincidan con tu búsqueda.', 'wp-plugin-booking' ); ?>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-        <?php
-        return ob_get_clean();
+        echo '<div class="container my-4">';
         echo '<div class="d-flex justify-content-between align-items-center mb-4 wpb-catalog-search">';
         echo '<a href="' . esc_url( home_url() ) . '" class="btn btn-dark">' . esc_html__( 'Inicio', 'wp-plugin-booking' ) . '</a>';
         echo '<form class="row g-2" method="get">';
@@ -363,12 +230,12 @@ class WP_Plugin_Booking {
             $remaining = $this->get_remaining_capacity( $id );
             $cats      = get_the_terms( $id, 'wpb_service_category' );
             $excerpt   = get_the_excerpt();
-
+          
             echo '<div class="col-md-4 mb-4 wpb-service">';
             echo '<div class="card h-100">';
             echo get_the_post_thumbnail( $id, 'medium', array( 'class' => 'card-img-top' ) );
             echo '<div class="card-body d-flex flex-column">';
-          
+
             if ( $cats && ! is_wp_error( $cats ) ) {
                 $first = $cats[0];
                 echo '<span class="badge bg-secondary mb-2">' . esc_html( $first->name ) . '</span>';
@@ -377,9 +244,12 @@ class WP_Plugin_Booking {
             if ( $excerpt ) {
                 echo '<p class="card-text">' . esc_html( wp_trim_words( $excerpt, 15 ) ) . '</p>';
             }
-
+          
             if ( $price ) {
-                echo '<p class="wpb-price mb-1">' . wp_kses_post( wc_price( $price, array( 'currency' => 'DOP' ) ) ) . '</p>';
+                $price_html = function_exists( 'wc_price' )
+                    ? wc_price( $price, array( 'currency' => 'DOP' ) )
+                    : number_format_i18n( $price, 2 ) . ' DOP';
+                echo '<p class="wpb-price mb-1">' . wp_kses_post( $price_html ) . '</p>';
             }
             if ( $remaining > 0 ) {
                 echo '<p class="wpb-remaining">' . sprintf( esc_html__( 'Cupos: %d', 'wp-plugin-booking' ), $remaining ) . '</p>';
@@ -408,7 +278,6 @@ class WP_Plugin_Booking {
             echo '</div>';
 
             echo '<div class="wpb-step">';
-
             echo '<div class="mb-3">';
             echo '<label class="form-label">' . esc_html__( 'Nombre', 'wp-plugin-booking' ) . '</label>';
             echo '<input type="text" class="form-control" name="name" required />';
@@ -422,10 +291,9 @@ class WP_Plugin_Booking {
             echo '</div>';
 
             echo '<div class="wpb-step">';
-
             echo '<div class="mb-3">';
             echo '<label class="form-label">' . esc_html__( 'Personas', 'wp-plugin-booking' ) . '</label>';
-            echo '<input type="number" class="form-control" name="persons" value="1" min="1" required />';
+            echo '<input type="number" class="form-control" name="persons" value="1" min="1" max="' . esc_attr( $remaining ) . '" required />';
             echo '</div>';
             echo '<button class="btn btn-secondary wpb-prev me-2">' . esc_html__( 'Atrás', 'wp-plugin-booking' ) . '</button>';
             echo '<button class="btn btn-danger wpb-next">' . esc_html__( 'Siguiente', 'wp-plugin-booking' ) . '</button>';
@@ -479,7 +347,6 @@ class WP_Plugin_Booking {
         $columns['persons'] = __( 'Cantidad', 'wp-plugin-booking' );
         $columns['total']   = __( 'Precio Total', 'wp-plugin-booking' );
         $columns['payment'] = __( 'Pago', 'wp-plugin-booking' );
-
         $columns['status']  = __( 'Estatus', 'wp-plugin-booking' );
         $columns['uid']     = __( 'ID Único', 'wp-plugin-booking' );
         return $columns;
@@ -499,13 +366,15 @@ class WP_Plugin_Booking {
             case 'total':
                 $total = get_post_meta( $post_id, '_wpb_total_price', true );
                 if ( $total ) {
-                    echo wp_kses_post( wc_price( $total, array( 'currency' => 'DOP' ) ) );
+                    $price_html = function_exists( 'wc_price' )
+                        ? wc_price( $total, array( 'currency' => 'DOP' ) )
+                        : number_format_i18n( $total, 2 ) . ' DOP';
+                    echo wp_kses_post( $price_html );
                 }
                 break;
             case 'payment':
                 echo esc_html( get_post_meta( $post_id, '_wpb_payment_method', true ) );
                 break;
-
             case 'status':
                 echo esc_html( get_post_meta( $post_id, '_wpb_status', true ) );
                 break;

@@ -1,439 +1,104 @@
-/* Variables globales */
-:root {
-    --primary-color: #2c3e50;
-    --secondary-color: #3498db;
-    --accent-color: #e74c3c;
-    --light-color: #ecf0f1;
-    --dark-color: #2c3e50;
-    --success-color: #27ae60;
-    --warning-color: #f39c12;
-    --danger-color: #e74c3c;
-    --border-radius: 8px;
-    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --transition: all 0.3s ease;
-}
 
-/* Estilos generales */
-body.wpb-catalog-page {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    line-height: 1.6;
-    color: #333;
-    background-color: #f8f9fa;
-    margin: 0;
-    padding: 0;
-}
 
-.container {
+.wpb-catalog-search {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
 }
 
-/* Encabezado */
-.wpb-header {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    color: white;
-    padding: 2rem 0;
-    margin-bottom: 2rem;
-    text-align: center;
-}
 
-.wpb-header h1 {
-    margin: 0;
-    font-size: 2.5rem;
-    font-weight: 700;
-}
-
-/* Barra de búsqueda */
-.wpb-search-container {
-    background: white;
-    padding: 2rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-    margin-bottom: 2rem;
-}
-
-.wpb-search-form {
-    display: flex;
-    gap: 1rem;
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.wpb-search-form input[type="text"],
-.wpb-search-form select {
-    flex: 1;
-    padding: 0.75rem 1rem;
-    border: 1px solid #ddd;
-    border-radius: var(--border-radius);
-    font-size: 1rem;
-}
-
-.wpb-search-form button {
-    background-color: var(--accent-color);
-    color: white;
-    border: none;
-    padding: 0 2rem;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    font-weight: 600;
-    transition: var(--transition);
-}
-
-.wpb-search-form button:hover {
-    background-color: #c0392b;
-    transform: translateY(-2px);
-}
-
-/* Grid de servicios */
 .wpb-catalog {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 2rem;
-    padding: 1rem 0;
-}
-
-/* Tarjeta de servicio */
-.wpb-service {
-    background: white;
-    border-radius: var(--border-radius);
-    overflow: hidden;
-    box-shadow: var(--box-shadow);
-    transition: var(--transition);
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 20px;
+    font-family: Arial, sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px;
 }
-
-.wpb-service:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+.wpb-service {
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    width: calc(33% - 20px);
+    box-sizing: border-box;
 }
-
-.wpb-thumbnail {
-    height: 200px;
-    overflow: hidden;
+.wpb-service h2 {
+    margin-top: 0;
+    font-size: 1.5em;
+    color: #cc0000;
+}
+.wpb-price {
+    font-weight: bold;
+    color: #d92626;
+    margin-bottom: 10px;
 }
 
 .wpb-thumbnail img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: var(--transition);
+    height: auto;
+    border-bottom: 3px solid #ffcc00;
 }
 
-.wpb-service:hover .wpb-thumbnail img {
-    transform: scale(1.05);
+
+.wpb-service .card {
+    transition: transform 0.3s, box-shadow 0.3s;
 }
 
-.wpb-service-content {
-    padding: 1.5rem;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+.wpb-service .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
-.wpb-service h2 {
-    margin: 0 0 0.5rem 0;
-    color: var(--primary-color);
-    font-size: 1.5rem;
+.wpb-booking-form label {
+    display: block;
+    margin-bottom: 5px;
+    color: #000;
 }
 
-.wpb-service p {
-    color: #666;
-    margin: 0 0 1rem 0;
-    flex-grow: 1;
+.wpb-booking-form input[type="text"],
+.wpb-booking-form input[type="email"],
+.wpb-booking-form input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
 }
 
-.wpb-price {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--accent-color);
-    margin: 0.5rem 0;
+.wpb-booking-form button[type="submit"] {
+    background: #cc0000;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
 }
 
-.wpb-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid #eee;
+.wpb-booking-form button[type="submit"]:hover {
+    background: #ffcc00;
+    color: #000;
 }
 
 .wpb-remaining {
-    font-size: 0.9rem;
-    color: #27ae60;
-    font-weight: 600;
+    margin: 10px 0;
+    font-weight: bold;
 }
 
 .wpb-soldout {
-    color: var(--danger-color);
-    font-weight: 600;
+    margin: 10px 0;
+    color: #cc0000;
+    font-weight: bold;
 }
-
-.wpb-book-now {
-    background: var(--secondary-color);
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 50px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: var(--transition);
-    text-align: center;
-    text-decoration: none;
+.wpb-step{
+    display:none;
+    opacity:0;
+    transition:opacity 0.3s ease;
 }
-
-.wpb-book-now:hover {
-    background: #2980b9;
-    transform: translateY(-2px);
+.wpb-step.active{
+    display:block;
+    opacity:1;
 }
-
-/* Modal de reserva */
-.wpb-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.wpb-modal.active {
-    display: flex;
-    opacity: 1;
-}
-
-.wpb-modal-content {
-    background: white;
-    border-radius: var(--border-radius);
-    width: 100%;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow-y: auto;
-    position: relative;
-    animation: modalFadeIn 0.3s ease;
-}
-
-@keyframes modalFadeIn {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
-.wpb-modal-header {
-    padding: 1.5rem;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.wpb-modal-header h3 {
-    margin: 0;
-    color: var(--primary-color);
-}
-
-.wpb-close-modal {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #666;
-    transition: color 0.2s;
-}
-
-.wpb-close-modal:hover {
-    color: var(--danger-color);
-}
-
-.wpb-modal-body {
-    padding: 1.5rem;
-}
-
-/* Pasos del formulario */
-.wpb-step {
-    display: none;
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateX(10px); }
-    to { opacity: 1; transform: translateX(0); }
-}
-
-.wpb-step.active {
-    display: block;
-}
-
-.wpb-step-title {
-    color: var(--primary-color);
-    margin-bottom: 1.5rem;
-    font-size: 1.25rem;
-    font-weight: 600;
-}
-
-/* Campos del formulario */
-.wpb-form-group {
-    margin-bottom: 1.5rem;
-}
-
-.wpb-form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    color: #555;
-}
-
-.wpb-form-control {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid #ddd;
-    border-radius: var(--border-radius);
-    font-size: 1rem;
-    transition: var(--transition);
-}
-
-.wpb-form-control:focus {
-    border-color: var(--secondary-color);
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-}
-
-/* Resumen de la reserva */
-.wpb-summary-item {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid #eee;
-}
-
-.wpb-summary-item:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-}
-
-.wpb-summary-label {
-    font-weight: 500;
-    color: #666;
-}
-
-.wpb-summary-value {
-    font-weight: 600;
-    color: var(--primary-color);
-}
-
-.wpb-summary-total {
-    margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 2px solid #eee;
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--accent-color);
-}
-
-/* Navegación del formulario */
-.wpb-form-nav {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #eee;
-}
-
-.wpb-btn {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 50px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    text-decoration: none;
-    text-align: center;
-}
-
-.wpb-btn-outline {
-    background: white;
-    border: 2px solid #ddd;
-    color: #666;
-}
-
-.wpb-btn-outline:hover {
-    background: #f8f9fa;
-    border-color: #999;
-}
-
-.wpb-btn-primary {
-    background: var(--secondary-color);
-    color: white;
-}
-
-.wpb-btn-primary:hover {
-    background: #2980b9;
-    transform: translateY(-2px);
-}
-
-/* Mensajes de éxito y error */
-.wpb-message {
-    padding: 1rem;
-    border-radius: var(--border-radius);
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-}
-
-.wpb-message svg {
-    margin-right: 0.75rem;
-    flex-shrink: 0;
-}
-
-.wpb-success {
-    background: rgba(39, 174, 96, 0.1);
-    color: #27ae60;
-    display: none;
-}
-
-.wpb-error {
-    background: rgba(231, 76, 60, 0.1);
-    color: #e74c3c;
-    display: none;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .wpb-search-form {
-        flex-direction: column;
-    }
-    
-    .wpb-catalog {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    }
-    
-    .wpb-modal-content {
-        margin: 1rem;
-        max-height: calc(100vh - 2rem);
-    }
-}
-
-/* Animaciones */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.wpb-animate {
-    animation: fadeInUp 0.5s ease forwards;
-}
+.wpb-summary-step p{margin-bottom:10px;}
+.wpb-success{display:none;padding:20px;text-align:center;}
+.wpb-error{display:none;}

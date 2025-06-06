@@ -22,3 +22,6 @@ Al activar el plugin se registrará el tipo de contenido **Servicio** con sus ca
  El plugin genera automáticamente una página de catálogo sin plantilla del tema donde los servicios se muestran usando **Bootstrap 5** con un diseño elegante en colores rojo, negro, amarillo y blanco. En la parte superior hay un buscador y un filtro por categorías además de un botón para volver al inicio. Cada servicio muestra su categoría, imagen destacada, una breve descripción, precio en DOP, la cantidad de cupos restantes y un botón **Reservar** (o un aviso **AGOTADO** si no quedan cupos).
 
  Al hacer clic en **Reservar** se abre un modal con un proceso paso a paso. Primero se visualiza la descripción completa del servicio, luego se solicitan los datos del cliente, la cantidad de personas y el método de pago (actualmente solo *transferencia*). Finalmente se presenta un resumen con el costo total antes de confirmar. Al enviarse la solicitud el modal muestra un mensaje de éxito sin utilizar alertas del navegador.
+
+Se añadieron animaciones suaves entre pasos del formulario y se valida la creación de reservas mostrando mensajes de error descriptivos.
+
