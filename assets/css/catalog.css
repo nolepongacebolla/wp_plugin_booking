@@ -68,8 +68,12 @@
 }
 .wpb-soldout {
   margin: 10px 0;
-  color: var(--wpb-primary);
+  background: var(--wpb-primary);
+  color: #fff;
+  padding: 4px 8px;
   font-weight: bold;
+  border-radius: 4px;
+
 }
 .wpb-step {
   display: none;
@@ -94,7 +98,6 @@
   margin: 0 5px 5px 0;
   cursor: pointer;
 }
-
 
 /* Lightbox styles */
 .wpb-lightbox {
@@ -202,3 +205,4 @@
   .hero-subtitle{font-size:1.1rem;}
   .premium-title{font-size:1.8rem;}
 }
+

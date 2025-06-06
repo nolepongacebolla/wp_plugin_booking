@@ -334,7 +334,6 @@ class WP_Plugin_Booking {
 
     public function booking_catalog_shortcode() {
         wp_enqueue_style( 'wpb-catalog', WP_PLUGIN_BOOKING_URL . 'assets/css/catalog.css', array(), WP_PLUGIN_BOOKING_VERSION );
-
         wp_enqueue_script( 'wpb-catalog', WP_PLUGIN_BOOKING_URL . 'assets/js/catalog.js', array( 'jquery' ), WP_PLUGIN_BOOKING_VERSION, true );
         wp_localize_script( 'wpb-catalog', 'wpbCatalog', array(
             'ajax_url' => admin_url( 'admin-ajax.php' ),
@@ -364,21 +363,12 @@ class WP_Plugin_Booking {
         echo '<div class="container my-5">';
         echo '<header class="hero-header py-5 text-center">';
         echo '<div class="hero-content">';
-        echo '<h1 class="hero-title mb-3">\xf0\x9f\x8c\xb4 Para\xc3\xadso Tur\xc3\xadstico</h1>';
+        echo '<h1 class="hero-title mb-3">🌴 Paraíso Turístico</h1>';
         echo '<p class="hero-subtitle mb-4">' . esc_html__( 'Experiencias inolvidables te esperan', 'wp-plugin-booking' ) . '</p>';
-        echo '<div class="row justify-content-center g-3">';
-        echo '<div class="col-6 col-md-3"><div class="stat-card rounded-4 p-3 text-center"><div class="stat-number">500+</div><div class="stat-label">Clientes</div></div></div>';
-        echo '<div class="col-6 col-md-3"><div class="stat-card rounded-4 p-3 text-center"><div class="stat-number">50+</div><div class="stat-label">Destinos</div></div></div>';
-        echo '<div class="col-6 col-md-3"><div class="stat-card rounded-4 p-3 text-center"><div class="stat-number">5\xe2\x98\x85</div><div class="stat-label">Rating</div></div></div>';
-        echo '<div class="col-6 col-md-3"><div class="stat-card rounded-4 p-3 text-center"><div class="stat-number">24/7</div><div class="stat-label">Soporte</div></div></div>';
-        echo '</div></div></header>';
-
+        echo '</div></header>';
         echo '<div class="d-flex justify-content-between align-items-center mb-4 wpb-catalog-search">';
-        echo '<a href="' . esc_url( home_url() ) . '" class="btn btn-dark">' . esc_html__( 'Inicio', 'wp-plugin-booking' ) . '</a>';
         echo '<form class="row g-2" method="get">';
-        echo '<div class="col">';
-        echo '<input type="text" class="form-control" name="s" value="' . esc_attr( isset( $_GET['s'] ) ? $_GET['s'] : '' ) . '" placeholder="' . esc_attr__( 'Buscar servicio', 'wp-plugin-booking' ) . '" />';
-        echo '</div>';
+
         $terms = get_terms( array( 'taxonomy' => 'wpb_service_category', 'hide_empty' => false ) );
         echo '<div class="col">';
         echo '<select name="category" class="form-select"><option value="">' . esc_html__( 'Todas las categorías', 'wp-plugin-booking' ) . '</option>';
@@ -389,9 +379,11 @@ class WP_Plugin_Booking {
         echo '</select>';
         echo '</div>';
         echo '<div class="col-auto">';
-        echo '<button type="submit" class="btn btn-danger">' . esc_html__( 'Buscar', 'wp-plugin-booking' ) . '</button>';
+        echo '<button type="submit" class="btn btn-danger">' . esc_html__( 'Filtrar', 'wp-plugin-booking' ) . '</button>';
         echo '</div>';
         echo '</form>';
+        echo '<div class="text-end mt-3"><a href="' . esc_url( home_url() ) . '" class="btn btn-outline-dark">' . esc_html__( 'Inicio', 'wp-plugin-booking' ) . '</a></div>';
+
         echo '</div>';
 
         echo '<div class="row wpb-catalog">';
@@ -541,7 +533,8 @@ class WP_Plugin_Booking {
         wp_reset_postdata();
         echo '</div>';
         echo '<div class="premium-banner p-5 text-center">';
-        echo '<h2 class="premium-title mb-3">\xe2\x9c\xa8 Servicios Premium \xe2\x9c\xa8</h2>';
+        echo '<h2 class="premium-title mb-3">✨ Servicios Premium ✨</h2>';
+
         echo '<p class="premium-text mb-4">' . esc_html__( '¿Buscas algo completamente personalizado? Nuestro equipo dise\xf1a experiencias \xfanicas para ti.', 'wp-plugin-booking' ) . '</p>';
         echo '<div class="row justify-content-center g-3">';
         echo '<div class="col-md-4"><div class="contact-item"><i class="fas fa-phone"></i><span>+1 (555) 123-4567</span></div></div>';
@@ -612,7 +605,6 @@ class WP_Plugin_Booking {
         ) );
 
         register_setting( 'wpb_email_group', 'wpb_email_template', array(
-
             'sanitize_callback' => array( $this, 'sanitize_email_template' ),
             'default'           => '',
         ) );
