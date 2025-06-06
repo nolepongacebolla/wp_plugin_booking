@@ -95,6 +95,7 @@
   cursor: pointer;
 }
 
+
 /* Lightbox styles */
 .wpb-lightbox {
   display:none;
@@ -201,4 +202,3 @@
   .hero-subtitle{font-size:1.1rem;}
   .premium-title{font-size:1.8rem;}
 }
-
