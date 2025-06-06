@@ -24,3 +24,4 @@ Al activar el plugin se registrará el tipo de contenido **Servicio** con sus ca
 
  Al hacer clic en **Reservar** se abre un modal con un proceso paso a paso. Primero se visualiza la descripción completa del servicio, luego se solicitan los datos del cliente, la cantidad de personas y el método de pago. Los métodos disponibles se configuran desde **Ajustes → Booking** en el administrador. Finalmente se presenta un resumen con el costo total antes de confirmar. Al enviarse la solicitud el modal muestra un mensaje de éxito sin utilizar alertas del navegador.
 Se añadieron animaciones suaves entre pasos del formulario y se valida la creación de reservas mostrando mensajes de error descriptivos. Las reservas pueden editarse desde su pantalla de edición incluyendo el estatus y el método de pago.
+
