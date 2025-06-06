@@ -1,0 +1,105 @@
+:root {
+  --wpb-primary: #dc3545;
+  --wpb-dark: #000000;
+  --wpb-light: #ffffff;
+  --wpb-accent: #ffc107;
+}
+
+.wpb-catalog-page {
+  background: var(--wpb-light);
+  color: var(--wpb-dark);
+  font-family: Arial, sans-serif;
+}
+
+.wpb-catalog-search {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.btn-danger {
+  background: var(--wpb-primary);
+  border-color: var(--wpb-primary);
+  color: var(--wpb-light);
+}
+.btn-danger:hover {
+  background: var(--wpb-accent);
+  border-color: var(--wpb-accent);
+  color: var(--wpb-dark);
+}
+.btn-dark {
+  background: var(--wpb-dark);
+  border-color: var(--wpb-dark);
+  color: var(--wpb-light);
+}
+.btn-dark:hover {
+  background: var(--wpb-dark-alt);
+  border-color: var(--wpb-dark-alt);
+  color: var(--wpb-light);
+}
+
+.wpb-catalog {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px;
+}
+
+.wpb-service .card {
+  background: var(--wpb-light);
+  color: var(--wpb-dark);
+  border: 1px solid #ddd;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.wpb-service .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+}
+.wpb-price {
+  font-weight: bold;
+  color: var(--wpb-accent);
+  margin-bottom: 10px;
+}
+.wpb-remaining {
+  margin: 10px 0;
+  font-weight: bold;
+}
+.wpb-soldout {
+  margin: 10px 0;
+  color: var(--wpb-primary);
+  font-weight: bold;
+}
+.wpb-step {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.wpb-step.active {
+  display: block;
+  opacity: 1;
+}
+.wpb-summary-step p { margin-bottom: 10px; }
+.wpb-success { display: none; padding: 20px; text-align: center; }
+.wpb-error { display: none; }
+
+/* Lightbox styles */
+.wpb-lightbox {
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.9);
+  z-index:1060;
+  justify-content:center;
+  align-items:center;
+}
+.wpb-lightbox img {
+  max-width:90%;
+  max-height:90%;
+}
+.wpb-modal-service-title { font-size:1.5rem; }
+
