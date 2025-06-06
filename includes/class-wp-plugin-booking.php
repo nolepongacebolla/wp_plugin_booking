@@ -11,7 +11,8 @@ class WP_Plugin_Booking {
         add_action( 'init', array( $this, 'register_booking_cpt' ) );
         add_shortcode( 'booking_catalog', array( $this, 'booking_catalog_shortcode' ) );
         add_filter( 'template_include', array( $this, 'catalog_template' ) );
-        add_action( 'add_meta_boxes', array( $this, 'add_service_meta_box' ) );
+        add_action( 'add_meta_boxes', array( $this, 'add_service_meta_boxes' ) );
+
         add_action( 'save_post_wpb_service', array( $this, 'save_service_meta' ) );
         add_action( 'wp_ajax_wpb_create_booking', array( $this, 'handle_create_booking' ) );
         add_action( 'wp_ajax_nopriv_wpb_create_booking', array( $this, 'handle_create_booking' ) );
@@ -23,6 +24,7 @@ class WP_Plugin_Booking {
             add_action( 'admin_init', array( $this, 'register_settings' ) );
             add_action( 'add_meta_boxes', array( $this, 'add_booking_meta_box' ) );
             add_action( 'save_post_wpb_booking', array( $this, 'save_booking_meta' ) );
+            add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
         }
     }
 
@@ -78,7 +80,7 @@ class WP_Plugin_Booking {
             'type'              => 'number',
             'single'            => true,
             'show_in_rest'      => true,
-            'sanitize_callback' => 'floatval',
+            'sanitize_callback' => array( $this, 'sanitize_float_meta' ),
             'auth_callback'     => function() { return current_user_can( 'edit_posts' ); },
         ) );
 
@@ -118,38 +120,89 @@ class WP_Plugin_Booking {
         return floatval( $value );
     }
 
-    public function add_service_meta_box() {
+    /**
+     * Generic float sanitizer accepting additional arguments.
+     */
+    public function sanitize_float_meta( $value, $meta_key = '', $object_type = '', $object_subtype = '' ) {
+        return floatval( $value );
+    }
+
+    public function add_service_meta_boxes() {
         add_meta_box(
-            'wpb_service_price',
+            'wpb_price_meta',
             __( 'Precio por Persona', 'wp-plugin-booking' ),
-            array( $this, 'render_service_meta_box' ),
+            array( $this, 'render_price_meta_box' ),
+            'wpb_service',
+            'side'
+        );
+
+        add_meta_box(
+            'wpb_capacity_meta',
+            __( 'Capacidad Máxima', 'wp-plugin-booking' ),
+            array( $this, 'render_capacity_meta_box' ),
+            'wpb_service',
+            'side'
+        );
+
+        add_meta_box(
+            'wpb_gallery_meta',
+            __( 'Galería de Imágenes', 'wp-plugin-booking' ),
+            array( $this, 'render_gallery_meta_box' ),
+            'wpb_service'
+        );
+
+        add_meta_box(
+            'wpb_video_meta',
+            __( 'Enlace de Video', 'wp-plugin-booking' ),
+            array( $this, 'render_video_meta_box' ),
+            'wpb_service'
+        );
+
+        add_meta_box(
+            'wpb_discount_meta',
+            __( 'Descuento', 'wp-plugin-booking' ),
+            array( $this, 'render_discount_meta_box' ),
             'wpb_service',
             'side'
         );
     }
 
-    public function render_service_meta_box( $post ) {
+    public function render_price_meta_box( $post ) {
         $value = get_post_meta( $post->ID, '_wpb_price_per_person', true );
-        echo '<label for="wpb_price_per_person">' . esc_html__( 'Precio', 'wp-plugin-booking' ) . '</label>';
         echo '<input type="number" step="0.01" name="wpb_price_per_person" id="wpb_price_per_person" value="' . esc_attr( $value ) . '" style="width:100%;" />';
+    }
+
+    public function render_capacity_meta_box( $post ) {
         $cap = get_post_meta( $post->ID, '_wpb_capacity', true );
-        echo '<label for="wpb_capacity" style="margin-top:10px;display:block;">' . esc_html__( 'Capacidad', 'wp-plugin-booking' ) . '</label>';
         echo '<input type="number" min="1" name="wpb_capacity" id="wpb_capacity" value="' . esc_attr( $cap ) . '" style="width:100%;" />';
+    }
 
+    public function render_gallery_meta_box( $post ) {
         $gallery = get_post_meta( $post->ID, '_wpb_gallery', true );
-        echo '<label for="wpb_gallery" style="margin-top:10px;display:block;">' . esc_html__( 'Galería (IDs separados por coma)', 'wp-plugin-booking' ) . '</label>';
-        echo '<input type="text" name="wpb_gallery" id="wpb_gallery" value="' . esc_attr( $gallery ) . '" style="width:100%;" />';
+        echo '<div id="wpb_gallery_preview">';
+        if ( $gallery ) {
+            $ids = array_filter( array_map( 'absint', explode( ',', $gallery ) ) );
+            foreach ( $ids as $img_id ) {
+                echo wp_get_attachment_image( $img_id, 'thumbnail', false, array( 'style' => 'margin-right:5px;' ) );
+            }
+        }
+        echo '</div>';
+        echo '<input type="hidden" name="wpb_gallery" id="wpb_gallery" value="' . esc_attr( $gallery ) . '" />';
+        echo '<button type="button" class="button" id="wpb_gallery_button">' . esc_html__( 'Seleccionar imágenes', 'wp-plugin-booking' ) . '</button>';
+    }
 
+    public function render_video_meta_box( $post ) {
         $video = get_post_meta( $post->ID, '_wpb_video_url', true );
-        echo '<label for="wpb_video_url" style="margin-top:10px;display:block;">' . esc_html__( 'URL de Video', 'wp-plugin-booking' ) . '</label>';
         echo '<input type="url" name="wpb_video_url" id="wpb_video_url" value="' . esc_attr( $video ) . '" style="width:100%;" />';
+    }
 
+    public function render_discount_meta_box( $post ) {
         $disc = get_post_meta( $post->ID, '_wpb_discount_percent', true );
         $min  = get_post_meta( $post->ID, '_wpb_discount_min', true );
-        echo '<label style="margin-top:10px;display:block;">' . esc_html__( 'Descuento (%)', 'wp-plugin-booking' ) . '</label>';
-        echo '<input type="number" step="0.1" name="wpb_discount_percent" value="' . esc_attr( $disc ) . '" style="width:100%;" />';
-        echo '<label style="margin-top:10px;display:block;">' . esc_html__( 'Personas mínimas para descuento', 'wp-plugin-booking' ) . '</label>';
-        echo '<input type="number" name="wpb_discount_min" value="' . esc_attr( $min ) . '" style="width:100%;" />';
+        echo '<p><label>' . esc_html__( 'Descuento (%)', 'wp-plugin-booking' ) . '<br />';
+        echo '<input type="number" step="0.1" name="wpb_discount_percent" value="' . esc_attr( $disc ) . '" style="width:100%;" /></label></p>';
+        echo '<p><label>' . esc_html__( 'Personas mínimas para descuento', 'wp-plugin-booking' ) . '<br />';
+        echo '<input type="number" name="wpb_discount_min" value="' . esc_attr( $min ) . '" style="width:100%;" /></label></p>';
     }
 
     public function save_service_meta( $post_id ) {
@@ -604,6 +657,7 @@ class WP_Plugin_Booking {
     public function sanitize_email_template( $html ) {
         return wp_kses_post( $html );
     }
+
     /**
      * Output settings page markup.
      */
@@ -641,7 +695,6 @@ class WP_Plugin_Booking {
         $email      = get_post_meta( $post->ID, '_wpb_customer_email', true );
         $phone      = get_post_meta( $post->ID, '_wpb_customer_phone', true );
         $id_card    = get_post_meta( $post->ID, '_wpb_customer_id_card', true );
-
         $persons    = get_post_meta( $post->ID, '_wpb_persons', true );
         $total      = get_post_meta( $post->ID, '_wpb_total_price', true );
         $payment    = get_post_meta( $post->ID, '_wpb_payment_method', true );
@@ -667,7 +720,6 @@ class WP_Plugin_Booking {
 
         echo '<p><label>' . esc_html__( 'Cédula', 'wp-plugin-booking' ) . '</label><br />';
         echo '<input type="text" name="wpb_customer_id_card" value="' . esc_attr( $id_card ) . '" class="regular-text" /></p>';
-
 
         echo '<p><label>' . esc_html__( 'Personas', 'wp-plugin-booking' ) . '</label><br />';
         echo '<input type="number" name="wpb_persons" value="' . esc_attr( $persons ) . '" /></p>';
@@ -801,6 +853,33 @@ class WP_Plugin_Booking {
         }
         echo '</tbody></table>';
         echo '</div>';
+    }
+
+    /**
+     * Enqueue scripts for media selection on service edit screens.
+     */
+    public function admin_enqueue_scripts( $hook ) {
+        if ( in_array( $hook, array( 'post.php', 'post-new.php' ), true ) ) {
+            $screen = get_current_screen();
+            if ( $screen && 'wpb_service' === $screen->post_type ) {
+                wp_enqueue_media();
+                wp_enqueue_script(
+                    'wpb-admin',
+                    WP_PLUGIN_BOOKING_URL . 'assets/js/admin.js',
+                    array( 'jquery' ),
+                    WP_PLUGIN_BOOKING_VERSION,
+                    true
+                );
+                wp_localize_script(
+                    'wpb-admin',
+                    'wpbGallery',
+                    array(
+                        'select' => __( 'Seleccionar imágenes', 'wp-plugin-booking' ),
+                        'use'    => __( 'Usar imágenes', 'wp-plugin-booking' ),
+                    )
+                );
+            }
+        }
     }
 
     /**
