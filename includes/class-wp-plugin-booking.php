@@ -12,7 +12,6 @@ class WP_Plugin_Booking {
         add_shortcode( 'booking_catalog', array( $this, 'booking_catalog_shortcode' ) );
         add_filter( 'template_include', array( $this, 'catalog_template' ) );
         add_action( 'add_meta_boxes', array( $this, 'add_service_meta_boxes' ) );
-
         add_action( 'save_post_wpb_service', array( $this, 'save_service_meta' ) );
         add_action( 'wp_ajax_wpb_create_booking', array( $this, 'handle_create_booking' ) );
         add_action( 'wp_ajax_nopriv_wpb_create_booking', array( $this, 'handle_create_booking' ) );
@@ -289,14 +288,12 @@ class WP_Plugin_Booking {
             update_post_meta( $booking_id, '_wpb_customer_email', $email );
             update_post_meta( $booking_id, '_wpb_customer_phone', $phone );
             update_post_meta( $booking_id, '_wpb_customer_id_card', $id_card );
-
             update_post_meta( $booking_id, '_wpb_persons', $persons );
             update_post_meta( $booking_id, '_wpb_total_price', $total );
             update_post_meta( $booking_id, '_wpb_status', 'pendiente' );
             update_post_meta( $booking_id, '_wpb_payment_method', $payment );
             update_post_meta( $booking_id, '_wpb_booking_uid', uniqid( 'resv_' ) );
             $this->send_status_email( $booking_id, 'pendiente' );
-
             wp_send_json_success();
         }
 
@@ -332,7 +329,6 @@ class WP_Plugin_Booking {
         } else {
             $message = sprintf( __( "Hola %s,\n\nTu reserva para %s ahora está %s.", 'wp-plugin-booking' ), $name, $service, $status );
         }
-
         wp_mail( $email, $subject, $message );
     }
 
@@ -400,7 +396,6 @@ class WP_Plugin_Booking {
             $video     = get_post_meta( $id, '_wpb_video_url', true );
             $discount  = floatval( get_post_meta( $id, '_wpb_discount_percent', true ) );
             $disc_min  = absint( get_post_meta( $id, '_wpb_discount_min', true ) );
-
             echo '<div class="col-md-4 mb-4 wpb-service">';
             echo '<div class="card h-100">';
             echo get_the_post_thumbnail( $id, 'medium', array( 'class' => 'card-img-top' ) );
@@ -441,10 +436,17 @@ class WP_Plugin_Booking {
             echo '<input type="hidden" name="service_id" value="' . esc_attr( $id ) . '" />';
 
             echo '<div class="wpb-step">';
+            echo '<h4 class="wpb-modal-service-title mb-3">' . esc_html( get_the_title() ) . '</h4>';
             if ( $gallery ) {
                 $ids = array_filter( array_map( 'absint', explode( ',', $gallery ) ) );
                 foreach ( $ids as $img_id ) {
-                    echo wp_get_attachment_image( $img_id, 'medium', false, array( 'class' => 'img-fluid mb-2 me-2' ) );
+                    $thumb = wp_get_attachment_image_src( $img_id, 'medium' );
+                    $full  = wp_get_attachment_image_src( $img_id, 'large' );
+                    if ( $thumb ) {
+                        $full_url  = $full ? $full[0] : $thumb[0];
+                        echo '<img src="' . esc_url( $thumb[0] ) . '" data-full="' . esc_url( $full_url ) . '" class="img-fluid mb-2 me-2 wpb-expand-image" style="cursor:pointer;" />';
+                    }
+
                 }
             }
             if ( $video ) {

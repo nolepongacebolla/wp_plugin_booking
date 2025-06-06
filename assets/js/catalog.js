@@ -66,4 +66,17 @@ jQuery(document).ready(function($){
             });
         });
     });
+
+    $('body').on('click', '.wpb-expand-image', function(e){
+        e.preventDefault();
+        var src = $(this).data('full');
+        if(!src) return;
+        var box = $('<div class="wpb-lightbox"><img src="'+src+'"/></div>');
+        $('body').append(box);
+        box.fadeIn(200);
+    });
+
+    $('body').on('click', '.wpb-lightbox', function(){
+        $(this).fadeOut(200, function(){ $(this).remove(); });
+    });
 });
