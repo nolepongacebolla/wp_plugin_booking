@@ -174,6 +174,7 @@ class WP_Plugin_Booking {
             update_post_meta( $booking_id, '_wpb_payment_method', $payment );
             update_post_meta( $booking_id, '_wpb_booking_uid', uniqid( 'resv_' ) );
             $this->send_status_email( $booking_id, 'pendiente' );
+
             wp_send_json_success();
         }
 
@@ -262,6 +263,7 @@ class WP_Plugin_Booking {
             $remaining = $this->get_remaining_capacity( $id );
             $cats      = get_the_terms( $id, 'wpb_service_category' );
             $excerpt   = get_the_excerpt();
+
             echo '<div class="col-md-4 mb-4 wpb-service">';
             echo '<div class="card h-100">';
             echo get_the_post_thumbnail( $id, 'medium', array( 'class' => 'card-img-top' ) );
@@ -274,6 +276,7 @@ class WP_Plugin_Booking {
             if ( $excerpt ) {
                 echo '<p class="card-text">' . esc_html( wp_trim_words( $excerpt, 15 ) ) . '</p>';
             }
+
             if ( $price ) {
                 $price_html = function_exists( 'wc_price' )
                     ? wc_price( $price, array( 'currency' => 'DOP' ) )
@@ -588,6 +591,7 @@ class WP_Plugin_Booking {
             if ( $old_status !== $new_status ) {
                 $this->send_status_email( $post_id, $new_status );
             }
+
         }
     }
 
