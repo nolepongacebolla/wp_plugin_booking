@@ -569,6 +569,7 @@ class WP_Plugin_Booking {
             update_post_meta( $post_id, '_wpb_status', sanitize_text_field( $_POST['wpb_status'] ) );
         }
     }
+
     /**
      * Register top level admin menu and settings submenu.
      */
