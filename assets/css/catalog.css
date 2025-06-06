@@ -1,15 +1,13 @@
-
 :root {
-  --wpb-dark: #2f3640;
-  --wpb-dark-alt: #353b48;
-  --wpb-light: #f5f6fa;
-  --wpb-accent: #fbc531;
-  --wpb-accent-alt: #e1b12c;
+  --wpb-primary: #dc3545;
+  --wpb-dark: #000000;
+  --wpb-light: #ffffff;
+  --wpb-accent: #ffc107;
 }
 
 .wpb-catalog-page {
-  background: var(--wpb-dark);
-  color: var(--wpb-light);
+  background: var(--wpb-light);
+  color: var(--wpb-dark);
   font-family: Arial, sans-serif;
 }
 
@@ -20,9 +18,9 @@
 }
 
 .btn-danger {
-  background: var(--wpb-accent-alt);
-  border-color: var(--wpb-accent-alt);
-  color: var(--wpb-dark);
+  background: var(--wpb-primary);
+  border-color: var(--wpb-primary);
+  color: var(--wpb-light);
 }
 .btn-danger:hover {
   background: var(--wpb-accent);
@@ -50,9 +48,9 @@
 }
 
 .wpb-service .card {
-  background: var(--wpb-dark-alt);
-  color: var(--wpb-light);
-  border: none;
+  background: var(--wpb-light);
+  color: var(--wpb-dark);
+  border: 1px solid #ddd;
   transition: transform 0.3s, box-shadow 0.3s;
 }
 .wpb-service .card:hover {
@@ -70,7 +68,7 @@
 }
 .wpb-soldout {
   margin: 10px 0;
-  color: var(--wpb-accent-alt);
+  color: var(--wpb-primary);
   font-weight: bold;
 }
 .wpb-step {

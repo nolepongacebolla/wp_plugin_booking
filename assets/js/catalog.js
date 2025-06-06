@@ -3,6 +3,8 @@ jQuery(document).ready(function($){
         var form = $(this);
         var steps = form.find('.wpb-step');
         var current = 0;
+        var discount = parseFloat(form.data('discount')) || 0;
+        var minDisc = parseInt(form.data('discountmin')) || 0;
         function showStep(i){
             steps.removeClass('active').hide();
             steps.eq(i).addClass('active').show();
@@ -26,6 +28,9 @@ jQuery(document).ready(function($){
                     var price = parseFloat(form.data('price')) || 0;
                     var persons = parseInt(form.find('input[name="persons"]').val()) || 1;
                     var total = price * persons;
+                    if(discount && persons >= minDisc){
+                        total = total * (1 - discount/100);
+                    }
                     form.find('.wpb-summary-name').text(form.find('input[name="name"]').val());
                     form.find('.wpb-summary-email').text(form.find('input[name="email"]').val());
                     form.find('.wpb-summary-persons').text(persons);
@@ -52,8 +57,7 @@ jQuery(document).ready(function($){
                         icon: 'success',
                         title: '¡Reserva realizada con éxito!'
                     }).then(function(){
-                        steps.hide();
-                        form.find('.wpb-success').show();
+                        location.reload();
                     });
                 } else {
                     var msg = response.data && response.data.message ? response.data.message : 'Error al reservar';
