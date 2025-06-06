@@ -1,0 +1,102 @@
+
+.wpb-catalog-search {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.wpb-catalog {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    font-family: Arial, sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px;
+}
+.wpb-service {
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    width: calc(33% - 20px);
+    box-sizing: border-box;
+}
+.wpb-service h2 {
+    margin-top: 0;
+    font-size: 1.5em;
+    color: #cc0000;
+}
+.wpb-price {
+    font-weight: bold;
+    color: #d92626;
+    margin-bottom: 10px;
+}
+
+.wpb-thumbnail img {
+    width: 100%;
+    height: auto;
+    border-bottom: 3px solid #ffcc00;
+}
+
+
+.wpb-service .card {
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.wpb-service .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.wpb-booking-form label {
+    display: block;
+    margin-bottom: 5px;
+    color: #000;
+}
+
+.wpb-booking-form input[type="text"],
+.wpb-booking-form input[type="email"],
+.wpb-booking-form input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+.wpb-booking-form button[type="submit"] {
+    background: #cc0000;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+.wpb-booking-form button[type="submit"]:hover {
+    background: #ffcc00;
+    color: #000;
+}
+
+.wpb-remaining {
+    margin: 10px 0;
+    font-weight: bold;
+}
+
+.wpb-soldout {
+    margin: 10px 0;
+    color: #cc0000;
+    font-weight: bold;
+}
+.wpb-step{
+    display:none;
+    opacity:0;
+    transition:opacity 0.3s ease;
+}
+.wpb-step.active{
+    display:block;
+    opacity:1;
+}
+.wpb-summary-step p{margin-bottom:10px;}
+.wpb-success{display:none;padding:20px;text-align:center;}
+.wpb-error{display:none;}
