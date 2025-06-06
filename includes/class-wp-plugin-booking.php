@@ -360,7 +360,19 @@ class WP_Plugin_Booking {
         $query = new WP_Query( $args );
 
         ob_start();
-        echo '<div class="container my-4">';
+        echo '<div class="floating-elements"><div class="floating-circle circle1"></div><div class="floating-circle circle2"></div><div class="floating-circle circle3"></div></div>';
+        echo '<div class="container my-5">';
+        echo '<header class="hero-header py-5 text-center">';
+        echo '<div class="hero-content">';
+        echo '<h1 class="hero-title mb-3">\xf0\x9f\x8c\xb4 Para\xc3\xadso Tur\xc3\xadstico</h1>';
+        echo '<p class="hero-subtitle mb-4">' . esc_html__( 'Experiencias inolvidables te esperan', 'wp-plugin-booking' ) . '</p>';
+        echo '<div class="row justify-content-center g-3">';
+        echo '<div class="col-6 col-md-3"><div class="stat-card rounded-4 p-3 text-center"><div class="stat-number">500+</div><div class="stat-label">Clientes</div></div></div>';
+        echo '<div class="col-6 col-md-3"><div class="stat-card rounded-4 p-3 text-center"><div class="stat-number">50+</div><div class="stat-label">Destinos</div></div></div>';
+        echo '<div class="col-6 col-md-3"><div class="stat-card rounded-4 p-3 text-center"><div class="stat-number">5\xe2\x98\x85</div><div class="stat-label">Rating</div></div></div>';
+        echo '<div class="col-6 col-md-3"><div class="stat-card rounded-4 p-3 text-center"><div class="stat-number">24/7</div><div class="stat-label">Soporte</div></div></div>';
+        echo '</div></div></header>';
+
         echo '<div class="d-flex justify-content-between align-items-center mb-4 wpb-catalog-search">';
         echo '<a href="' . esc_url( home_url() ) . '" class="btn btn-dark">' . esc_html__( 'Inicio', 'wp-plugin-booking' ) . '</a>';
         echo '<form class="row g-2" method="get">';
@@ -393,8 +405,9 @@ class WP_Plugin_Booking {
             $video     = get_post_meta( $id, '_wpb_video_url', true );
             $discount  = floatval( get_post_meta( $id, '_wpb_discount_percent', true ) );
             $disc_min  = absint( get_post_meta( $id, '_wpb_discount_min', true ) );
-            echo '<div class="col-md-4 mb-4 wpb-service">';
-            echo '<div class="card h-100">';
+            echo '<div class="col-md-6 col-lg-4 mb-4 wpb-service">';
+            echo '<div class="card service-card rounded-4 h-100">';
+
             echo get_the_post_thumbnail( $id, 'medium', array( 'class' => 'card-img-top' ) );
             echo '<div class="card-body d-flex flex-column">';
             if ( $cats && ! is_wp_error( $cats ) ) {
@@ -443,7 +456,6 @@ class WP_Plugin_Booking {
                         $full_url  = $full ? $full[0] : $thumb[0];
                         echo '<img src="' . esc_url( $thumb[0] ) . '" data-full="' . esc_url( $full_url ) . '" class="wpb-gallery-thumb wpb-expand-image" />';
                     }
-
                 }
             }
             if ( $video ) {
@@ -528,6 +540,15 @@ class WP_Plugin_Booking {
         }
         wp_reset_postdata();
         echo '</div>';
+        echo '<div class="premium-banner p-5 text-center">';
+        echo '<h2 class="premium-title mb-3">\xe2\x9c\xa8 Servicios Premium \xe2\x9c\xa8</h2>';
+        echo '<p class="premium-text mb-4">' . esc_html__( '¿Buscas algo completamente personalizado? Nuestro equipo dise\xf1a experiencias \xfanicas para ti.', 'wp-plugin-booking' ) . '</p>';
+        echo '<div class="row justify-content-center g-3">';
+        echo '<div class="col-md-4"><div class="contact-item"><i class="fas fa-phone"></i><span>+1 (555) 123-4567</span></div></div>';
+        echo '<div class="col-md-4"><div class="contact-item"><i class="fas fa-envelope"></i><span>info@paraisoturistico.com</span></div></div>';
+        echo '<div class="col-md-4"><div class="contact-item"><i class="fas fa-globe"></i><span>www.paraisoturistico.com</span></div></div>';
+        echo '</div></div>';
+
         echo '</div>';
         return ob_get_clean();
     }
