@@ -51,6 +51,11 @@ jQuery(document).ready(function($){
         form.on('submit', function(e){
             e.preventDefault();
             form.find(':hidden[required]').prop('required', false);
+            var btn = form.find('.wpb-confirm');
+            var spinner = form.find('.wpb-processing');
+            btn.prop('disabled', true);
+            spinner.show();
+
             $.post(wpbCatalog.ajax_url, form.serialize(), function(response){
                 if(response.success){
                     Swal.fire({
@@ -63,6 +68,10 @@ jQuery(document).ready(function($){
                     var msg = response.data && response.data.message ? response.data.message : 'Error al reservar';
                     Swal.fire('Error', msg, 'error');
                 }
+            }).always(function(){
+                spinner.hide();
+                btn.prop('disabled', false);
+
             });
         });
     });
@@ -71,9 +80,10 @@ jQuery(document).ready(function($){
         e.preventDefault();
         var src = $(this).data('full');
         if(!src) return;
-        var box = $('<div class="wpb-lightbox"><img src="'+src+'"/></div>');
+        var box = $('<div class="wpb-lightbox" style="display:none"><img src="'+src+'"/></div>');
         $('body').append(box);
-        box.fadeIn(200);
+        box.css('display','flex').hide().fadeIn(200);
+
     });
 
     $('body').on('click', '.wpb-lightbox', function(){

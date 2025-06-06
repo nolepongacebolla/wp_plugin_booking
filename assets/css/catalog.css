@@ -83,6 +83,18 @@
 .wpb-summary-step p { margin-bottom: 10px; }
 .wpb-success { display: none; padding: 20px; text-align: center; }
 .wpb-error { display: none; }
+.wpb-processing { display:none; align-items:center; }
+
+/* Gallery thumbnails */
+.wpb-gallery-thumb {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border: 1px solid #ddd;
+  margin: 0 5px 5px 0;
+  cursor: pointer;
+}
+
 
 /* Lightbox styles */
 .wpb-lightbox {
@@ -100,6 +112,8 @@
 .wpb-lightbox img {
   max-width:90%;
   max-height:90%;
+  display:block;
+  margin:auto;
 }
 .wpb-modal-service-title { font-size:1.5rem; }
 

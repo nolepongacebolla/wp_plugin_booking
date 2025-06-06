@@ -334,10 +334,7 @@ class WP_Plugin_Booking {
 
     public function booking_catalog_shortcode() {
         wp_enqueue_style( 'wpb-catalog', WP_PLUGIN_BOOKING_URL . 'assets/css/catalog.css', array(), WP_PLUGIN_BOOKING_VERSION );
-        $custom_css = get_option( 'wpb_catalog_custom_css', '' );
-        if ( $custom_css ) {
-            wp_add_inline_style( 'wpb-catalog', $custom_css );
-        }
+
         wp_enqueue_script( 'wpb-catalog', WP_PLUGIN_BOOKING_URL . 'assets/js/catalog.js', array( 'jquery' ), WP_PLUGIN_BOOKING_VERSION, true );
         wp_localize_script( 'wpb-catalog', 'wpbCatalog', array(
             'ajax_url' => admin_url( 'admin-ajax.php' ),
@@ -444,7 +441,7 @@ class WP_Plugin_Booking {
                     $full  = wp_get_attachment_image_src( $img_id, 'large' );
                     if ( $thumb ) {
                         $full_url  = $full ? $full[0] : $thumb[0];
-                        echo '<img src="' . esc_url( $thumb[0] ) . '" data-full="' . esc_url( $full_url ) . '" class="img-fluid mb-2 me-2 wpb-expand-image" style="cursor:pointer;" />';
+                        echo '<img src="' . esc_url( $thumb[0] ) . '" data-full="' . esc_url( $full_url ) . '" class="wpb-gallery-thumb wpb-expand-image" />';
                     }
 
                 }
@@ -515,7 +512,9 @@ class WP_Plugin_Booking {
             echo '<p><strong>' . esc_html__( 'Total:', 'wp-plugin-booking' ) . '</strong> RD$ <span class="wpb-summary-total"></span></p>';
             echo '<div class="wpb-error text-danger mb-2"></div>';
             echo '<button class="btn btn-secondary wpb-prev me-2">' . esc_html__( 'Atrás', 'wp-plugin-booking' ) . '</button>';
-            echo '<button type="submit" class="btn btn-danger">' . esc_html__( 'Confirmar Reserva', 'wp-plugin-booking' ) . '</button>';
+            echo '<button type="submit" class="btn btn-danger wpb-confirm">' . esc_html__( 'Confirmar Reserva', 'wp-plugin-booking' ) . '</button>';
+            echo '<div class="wpb-processing mt-3"><div class="spinner-border text-danger" role="status"><span class="visually-hidden">' . esc_html__( 'Procesando...', 'wp-plugin-booking' ) . '</span></div><span class="ms-2">' . esc_html__( 'Procesando, por favor espere...', 'wp-plugin-booking' ) . '</span></div>';
+
             echo '</div>';
 
             echo '<div class="wpb-step wpb-success">';
@@ -591,17 +590,15 @@ class WP_Plugin_Booking {
             'default'           => 'transferencia',
         ) );
 
-        register_setting( 'wpb_settings_group', 'wpb_catalog_custom_css', array(
-            'sanitize_callback' => array( $this, 'sanitize_custom_css' ),
-            'default'           => '',
-        ) );
+        register_setting( 'wpb_email_group', 'wpb_email_template', array(
 
-        register_setting( 'wpb_settings_group', 'wpb_email_template', array(
             'sanitize_callback' => array( $this, 'sanitize_email_template' ),
             'default'           => '',
         ) );
 
         add_settings_section( 'wpb_main', __( 'Ajustes Generales', 'wp-plugin-booking' ), null, 'wpb-settings' );
+        add_settings_section( 'wpb_email', __( 'Plantilla de Correo', 'wp-plugin-booking' ), null, 'wpb-email' );
+
 
         add_settings_field(
             'wpb_payment_methods',
@@ -612,19 +609,11 @@ class WP_Plugin_Booking {
         );
 
         add_settings_field(
-            'wpb_catalog_custom_css',
-            __( 'CSS Personalizado para el Catálogo', 'wp-plugin-booking' ),
-            array( $this, 'custom_css_field' ),
-            'wpb-settings',
-            'wpb_main'
-        );
-
-        add_settings_field(
             'wpb_email_template',
             __( 'Plantilla de correo', 'wp-plugin-booking' ),
             array( $this, 'email_template_field' ),
-            'wpb-settings',
-            'wpb_main'
+            'wpb-email',
+            'wpb_email'
         );
     }
 
@@ -636,24 +625,10 @@ class WP_Plugin_Booking {
         echo '<input type="text" name="wpb_payment_methods" value="' . esc_attr( $value ) . '" class="regular-text" />';
     }
 
-    /**
-     * Render custom CSS textarea field.
-     */
-    public function custom_css_field() {
-        $value = get_option( 'wpb_catalog_custom_css', '' );
-        echo '<textarea name="wpb_catalog_custom_css" rows="10" cols="50" class="large-text code">' . esc_textarea( $value ) . '</textarea>';
-    }
-
     public function email_template_field() {
         $value = get_option( 'wpb_email_template', '' );
         echo '<textarea name="wpb_email_template" rows="10" cols="50" class="large-text code">' . esc_textarea( $value ) . '</textarea>';
-    }
-
-    /**
-     * Sanitize custom CSS before saving.
-     */
-    public function sanitize_custom_css( $css ) {
-        return wp_kses_post( $css );
+        echo '<p class="description">' . esc_html__( 'Usa {name}, {service}, {status} y {total} para insertar datos de la reserva.', 'wp-plugin-booking' ) . '</p>';
     }
 
     public function sanitize_email_template( $html ) {
@@ -664,11 +639,22 @@ class WP_Plugin_Booking {
      * Output settings page markup.
      */
     public function render_settings_page() {
+        $tab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'general';
         echo '<div class="wrap">';
         echo '<h1>' . esc_html__( 'Ajustes de Booking', 'wp-plugin-booking' ) . '</h1>';
+        echo '<h2 class="nav-tab-wrapper">';
+        echo '<a href="?page=wpb-settings&tab=general" class="nav-tab' . ( 'general' === $tab ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Generales', 'wp-plugin-booking' ) . '</a>';
+        echo '<a href="?page=wpb-settings&tab=email" class="nav-tab' . ( 'email' === $tab ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Plantilla de Correo', 'wp-plugin-booking' ) . '</a>';
+        echo '</h2>';
         echo '<form method="post" action="options.php">';
-        settings_fields( 'wpb_settings_group' );
-        do_settings_sections( 'wpb-settings' );
+        if ( 'email' === $tab ) {
+            settings_fields( 'wpb_email_group' );
+            do_settings_sections( 'wpb-email' );
+        } else {
+            settings_fields( 'wpb_settings_group' );
+            do_settings_sections( 'wpb-settings' );
+        }
+
         submit_button();
         echo '</form></div>';
     }
