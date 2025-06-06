@@ -20,6 +20,7 @@ class WP_Plugin_Booking {
 
         if ( is_admin() ) {
             add_action( 'admin_menu', array( $this, 'register_admin_menu' ) );
+
             add_action( 'admin_init', array( $this, 'register_settings' ) );
             add_action( 'add_meta_boxes', array( $this, 'add_booking_meta_box' ) );
             add_action( 'save_post_wpb_booking', array( $this, 'save_booking_meta' ) );
@@ -33,6 +34,7 @@ class WP_Plugin_Booking {
             'show_in_menu'=> 'wpbookingstandar',
             'supports'    => array( 'title', 'editor', 'thumbnail' ),
             'rewrite'     => array( 'slug' => 'servicio' ),
+
         ) );
 
         register_taxonomy( 'wpb_service_category', 'wpb_service', array(
@@ -241,6 +243,7 @@ class WP_Plugin_Booking {
             $remaining = $this->get_remaining_capacity( $id );
             $cats      = get_the_terms( $id, 'wpb_service_category' );
             $excerpt   = get_the_excerpt();
+
             echo '<div class="col-md-4 mb-4 wpb-service">';
             echo '<div class="card h-100">';
             echo get_the_post_thumbnail( $id, 'medium', array( 'class' => 'card-img-top' ) );
@@ -253,6 +256,7 @@ class WP_Plugin_Booking {
             if ( $excerpt ) {
                 echo '<p class="card-text">' . esc_html( wp_trim_words( $excerpt, 15 ) ) . '</p>';
             }
+
             if ( $price ) {
                 $price_html = function_exists( 'wc_price' )
                     ? wc_price( $price, array( 'currency' => 'DOP' ) )
@@ -453,6 +457,7 @@ class WP_Plugin_Booking {
      */
     public function sanitize_custom_css( $css ) {
         return wp_kses_post( $css );
+
     }
 
     /**
@@ -564,7 +569,6 @@ class WP_Plugin_Booking {
             update_post_meta( $post_id, '_wpb_status', sanitize_text_field( $_POST['wpb_status'] ) );
         }
     }
-
     /**
      * Register top level admin menu and settings submenu.
      */
