@@ -173,11 +173,33 @@ class WP_Plugin_Booking {
             update_post_meta( $booking_id, '_wpb_status', 'pendiente' );
             update_post_meta( $booking_id, '_wpb_payment_method', $payment );
             update_post_meta( $booking_id, '_wpb_booking_uid', uniqid( 'resv_' ) );
+            $this->send_status_email( $booking_id, 'pendiente' );
+
             wp_send_json_success();
         }
 
         $message = is_wp_error( $booking_id ) ? $booking_id->get_error_message() : __( 'Error al procesar la reserva', 'wp-plugin-booking' );
         wp_send_json_error( array( 'message' => $message ) );
+    }
+
+    /**
+     * Send an email to the customer when the booking status changes.
+     *
+     * @param int    $booking_id Booking post ID.
+     * @param string $status     New status.
+     */
+    public function send_status_email( $booking_id, $status ) {
+        $email   = get_post_meta( $booking_id, '_wpb_customer_email', true );
+        if ( ! $email ) {
+            return;
+        }
+        $name        = get_post_meta( $booking_id, '_wpb_customer_name', true );
+        $service_id  = get_post_meta( $booking_id, '_wpb_service_id', true );
+        $service     = $service_id ? get_the_title( $service_id ) : '';
+        $subject     = sprintf( __( 'Estado de tu reserva: %s', 'wp-plugin-booking' ), ucfirst( $status ) );
+        $message     = sprintf( __( "Hola %s,\n\nTu reserva para %s ahora está %s.", 'wp-plugin-booking' ), $name, $service, $status );
+
+        wp_mail( $email, $subject, $message );
     }
 
     public function booking_catalog_shortcode() {
@@ -241,7 +263,7 @@ class WP_Plugin_Booking {
             $remaining = $this->get_remaining_capacity( $id );
             $cats      = get_the_terms( $id, 'wpb_service_category' );
             $excerpt   = get_the_excerpt();
-          
+
             echo '<div class="col-md-4 mb-4 wpb-service">';
             echo '<div class="card h-100">';
             echo get_the_post_thumbnail( $id, 'medium', array( 'class' => 'card-img-top' ) );
@@ -563,7 +585,13 @@ class WP_Plugin_Booking {
             update_post_meta( $post_id, '_wpb_payment_method', sanitize_text_field( $_POST['wpb_payment_method'] ) );
         }
         if ( isset( $_POST['wpb_status'] ) ) {
-            update_post_meta( $post_id, '_wpb_status', sanitize_text_field( $_POST['wpb_status'] ) );
+            $old_status = get_post_meta( $post_id, '_wpb_status', true );
+            $new_status = sanitize_text_field( $_POST['wpb_status'] );
+            update_post_meta( $post_id, '_wpb_status', $new_status );
+            if ( $old_status !== $new_status ) {
+                $this->send_status_email( $post_id, $new_status );
+            }
+
         }
     }
 
@@ -588,6 +616,51 @@ class WP_Plugin_Booking {
             'wpb-settings',
             array( $this, 'render_settings_page' )
         );
+
+        add_submenu_page(
+            'wpbookingstandar',
+            __( 'Estadisticas', 'wp-plugin-booking' ),
+            __( 'Estadisticas', 'wp-plugin-booking' ),
+            'manage_options',
+            'wpb-stats',
+            array( $this, 'render_stats_page' )
+        );
+    }
+
+    /**
+     * Display simple booking statistics.
+     */
+    public function render_stats_page() {
+        $bookings = get_posts( array(
+            'post_type'   => 'wpb_booking',
+            'numberposts' => -1,
+        ) );
+
+        $total       = 0;
+        $status_totals = array();
+        foreach ( $bookings as $booking ) {
+            $price  = floatval( get_post_meta( $booking->ID, '_wpb_total_price', true ) );
+            $status = get_post_meta( $booking->ID, '_wpb_status', true );
+            $total += $price;
+            if ( ! isset( $status_totals[ $status ] ) ) {
+                $status_totals[ $status ] = 0;
+            }
+            $status_totals[ $status ]++;
+        }
+
+        echo '<div class="wrap">';
+        echo '<h1>' . esc_html__( 'Estadisticas', 'wp-plugin-booking' ) . '</h1>';
+        echo '<p>' . sprintf( esc_html__( 'Reservas totales: %d', 'wp-plugin-booking' ), count( $bookings ) ) . '</p>';
+        $price_html = function_exists( 'wc_price' )
+            ? wc_price( $total, array( 'currency' => 'DOP' ) )
+            : number_format_i18n( $total, 2 ) . ' DOP';
+        echo '<p>' . sprintf( esc_html__( 'Ganancias totales: %s', 'wp-plugin-booking' ), $price_html ) . '</p>';
+        echo '<table class="widefat"><thead><tr><th>' . esc_html__( 'Estatus', 'wp-plugin-booking' ) . '</th><th>' . esc_html__( 'Cantidad', 'wp-plugin-booking' ) . '</th></tr></thead><tbody>';
+        foreach ( $status_totals as $st => $count ) {
+            echo '<tr><td>' . esc_html( ucfirst( $st ) ) . '</td><td>' . esc_html( $count ) . '</td></tr>';
+        }
+        echo '</tbody></table>';
+        echo '</div>';
     }
 
     /**

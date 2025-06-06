@@ -1,102 +1,87 @@
 
+:root {
+  --wpb-dark: #2f3640;
+  --wpb-dark-alt: #353b48;
+  --wpb-light: #f5f6fa;
+  --wpb-accent: #fbc531;
+  --wpb-accent-alt: #e1b12c;
+}
+
+.wpb-catalog-page {
+  background: var(--wpb-dark);
+  color: var(--wpb-light);
+  font-family: Arial, sans-serif;
+}
+
 .wpb-catalog-search {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.btn-danger {
+  background: var(--wpb-accent-alt);
+  border-color: var(--wpb-accent-alt);
+  color: var(--wpb-dark);
+}
+.btn-danger:hover {
+  background: var(--wpb-accent);
+  border-color: var(--wpb-accent);
+  color: var(--wpb-dark);
+}
+.btn-dark {
+  background: var(--wpb-dark);
+  border-color: var(--wpb-dark);
+  color: var(--wpb-light);
+}
+.btn-dark:hover {
+  background: var(--wpb-dark-alt);
+  border-color: var(--wpb-dark-alt);
+  color: var(--wpb-light);
 }
 
 .wpb-catalog {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    font-family: Arial, sans-serif;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 40px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px;
 }
-.wpb-service {
-    background: #fff;
-    border: 1px solid #ddd;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    width: calc(33% - 20px);
-    box-sizing: border-box;
-}
-.wpb-service h2 {
-    margin-top: 0;
-    font-size: 1.5em;
-    color: #cc0000;
-}
-.wpb-price {
-    font-weight: bold;
-    color: #d92626;
-    margin-bottom: 10px;
-}
-
-.wpb-thumbnail img {
-    width: 100%;
-    height: auto;
-    border-bottom: 3px solid #ffcc00;
-}
-
 
 .wpb-service .card {
-    transition: transform 0.3s, box-shadow 0.3s;
+  background: var(--wpb-dark-alt);
+  color: var(--wpb-light);
+  border: none;
+  transition: transform 0.3s, box-shadow 0.3s;
 }
-
 .wpb-service .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
 }
-
-.wpb-booking-form label {
-    display: block;
-    margin-bottom: 5px;
-    color: #000;
+.wpb-price {
+  font-weight: bold;
+  color: var(--wpb-accent);
+  margin-bottom: 10px;
 }
-
-.wpb-booking-form input[type="text"],
-.wpb-booking-form input[type="email"],
-.wpb-booking-form input[type="number"] {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-}
-
-.wpb-booking-form button[type="submit"] {
-    background: #cc0000;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-}
-
-.wpb-booking-form button[type="submit"]:hover {
-    background: #ffcc00;
-    color: #000;
-}
-
 .wpb-remaining {
-    margin: 10px 0;
-    font-weight: bold;
+  margin: 10px 0;
+  font-weight: bold;
 }
-
 .wpb-soldout {
-    margin: 10px 0;
-    color: #cc0000;
-    font-weight: bold;
+  margin: 10px 0;
+  color: var(--wpb-accent-alt);
+  font-weight: bold;
 }
-.wpb-step{
-    display:none;
-    opacity:0;
-    transition:opacity 0.3s ease;
+.wpb-step {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
-.wpb-step.active{
-    display:block;
-    opacity:1;
+.wpb-step.active {
+  display: block;
+  opacity: 1;
 }
-.wpb-summary-step p{margin-bottom:10px;}
-.wpb-success{display:none;padding:20px;text-align:center;}
-.wpb-error{display:none;}
+.wpb-summary-step p { margin-bottom: 10px; }
+.wpb-success { display: none; padding: 20px; text-align: center; }
+.wpb-error { display: none; }
