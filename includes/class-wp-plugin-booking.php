@@ -236,12 +236,14 @@ class WP_Plugin_Booking {
             update_post_meta( $booking_id, '_wpb_customer_email', $email );
             update_post_meta( $booking_id, '_wpb_customer_phone', $phone );
             update_post_meta( $booking_id, '_wpb_customer_id_card', $id_card );
+
             update_post_meta( $booking_id, '_wpb_persons', $persons );
             update_post_meta( $booking_id, '_wpb_total_price', $total );
             update_post_meta( $booking_id, '_wpb_status', 'pendiente' );
             update_post_meta( $booking_id, '_wpb_payment_method', $payment );
             update_post_meta( $booking_id, '_wpb_booking_uid', uniqid( 'resv_' ) );
             $this->send_status_email( $booking_id, 'pendiente' );
+
             wp_send_json_success();
         }
 
@@ -277,6 +279,7 @@ class WP_Plugin_Booking {
         } else {
             $message = sprintf( __( "Hola %s,\n\nTu reserva para %s ahora está %s.", 'wp-plugin-booking' ), $name, $service, $status );
         }
+
         wp_mail( $email, $subject, $message );
     }
 
@@ -344,6 +347,7 @@ class WP_Plugin_Booking {
             $video     = get_post_meta( $id, '_wpb_video_url', true );
             $discount  = floatval( get_post_meta( $id, '_wpb_discount_percent', true ) );
             $disc_min  = absint( get_post_meta( $id, '_wpb_discount_min', true ) );
+
             echo '<div class="col-md-4 mb-4 wpb-service">';
             echo '<div class="card h-100">';
             echo get_the_post_thumbnail( $id, 'medium', array( 'class' => 'card-img-top' ) );
@@ -353,6 +357,7 @@ class WP_Plugin_Booking {
                 echo '<span class="badge bg-secondary mb-2">' . esc_html( $first->name ) . '</span>';
             }
             echo '<h5 class="card-title">' . esc_html( get_the_title() ) . '</h5>';
+
             if ( $price ) {
                 $price_html = function_exists( 'wc_price' )
                     ? wc_price( $price, array( 'currency' => 'DOP' ) )
@@ -368,6 +373,7 @@ class WP_Plugin_Booking {
             echo '</div>'; // card-body
             echo '</div>'; // card
             echo '<div class="modal fade" id="wpb-modal-' . esc_attr( $id ) . '" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">';
+
             echo '<div class="modal-dialog modal-dialog-centered modal-lg">';
             echo '<div class="modal-content">';
             echo '<div class="modal-header">';
@@ -376,6 +382,7 @@ class WP_Plugin_Booking {
             echo '</div>';
             echo '<div class="modal-body">';
             echo '<form class="wpb-booking-form" data-price="' . esc_attr( $price ) . '" data-discount="' . esc_attr( $discount ) . '" data-discountmin="' . esc_attr( $disc_min ) . '">';
+
             echo '<input type="hidden" name="action" value="wpb_create_booking" />';
             echo '<input type="hidden" name="nonce" value="' . esc_attr( wp_create_nonce( 'wpb_booking_nonce' ) ) . '" />';
             echo '<input type="hidden" name="service_id" value="' . esc_attr( $id ) . '" />';
@@ -411,6 +418,7 @@ class WP_Plugin_Booking {
             echo '<input type="text" class="form-control" name="phone" required />';
             echo '</div>';
             echo '<div class="mb-3">';
+
             echo '<label class="form-label">' . esc_html__( 'Email', 'wp-plugin-booking' ) . '</label>';
             echo '<input type="email" class="form-control" name="email" required />';
             echo '</div>';
@@ -596,7 +604,6 @@ class WP_Plugin_Booking {
     public function sanitize_email_template( $html ) {
         return wp_kses_post( $html );
     }
-
     /**
      * Output settings page markup.
      */
@@ -634,6 +641,7 @@ class WP_Plugin_Booking {
         $email      = get_post_meta( $post->ID, '_wpb_customer_email', true );
         $phone      = get_post_meta( $post->ID, '_wpb_customer_phone', true );
         $id_card    = get_post_meta( $post->ID, '_wpb_customer_id_card', true );
+
         $persons    = get_post_meta( $post->ID, '_wpb_persons', true );
         $total      = get_post_meta( $post->ID, '_wpb_total_price', true );
         $payment    = get_post_meta( $post->ID, '_wpb_payment_method', true );
@@ -659,6 +667,7 @@ class WP_Plugin_Booking {
 
         echo '<p><label>' . esc_html__( 'Cédula', 'wp-plugin-booking' ) . '</label><br />';
         echo '<input type="text" name="wpb_customer_id_card" value="' . esc_attr( $id_card ) . '" class="regular-text" /></p>';
+
 
         echo '<p><label>' . esc_html__( 'Personas', 'wp-plugin-booking' ) . '</label><br />';
         echo '<input type="number" name="wpb_persons" value="' . esc_attr( $persons ) . '" /></p>';
