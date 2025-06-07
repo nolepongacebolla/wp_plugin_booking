@@ -73,7 +73,6 @@
   padding: 4px 8px;
   font-weight: bold;
   border-radius: 4px;
-
 }
 .wpb-step {
   display: none;
@@ -119,6 +118,9 @@
   margin:auto;
 }
 .wpb-modal-service-title { font-size:1.5rem; }
+.wpb-terms summary { cursor:pointer; font-weight:bold; }
+.wpb-includes { background:#f8f9fa; padding:10px; border-radius:8px; }
+
 
 /* Hero header and premium styles from sample template */
 .wpb-catalog-page {

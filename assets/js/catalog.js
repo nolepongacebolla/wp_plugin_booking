@@ -26,11 +26,13 @@ jQuery(document).ready(function($){
                 current++;
                 if(form.find('.wpb-step').eq(current).hasClass('wpb-summary-step')){
                     var price = parseFloat(form.data('price')) || 0;
-                    var persons = parseInt(form.find('input[name="persons"]').val()) || 1;
+                    var persons = parseInt(form.find('select[name="persons"]').val()) || 1;
                     var total = price * persons;
                     if(discount && persons >= minDisc){
                         total = total * (1 - discount/100);
                     }
+                    form.find('.wpb-summary-service').text(form.closest('.modal').find('.wpb-modal-service-title').text());
+                    form.find('.wpb-summary-date').text(form.closest('.modal').find('.wpb-modal-service-title').next('.mb-2').text().replace(/^[^:]*:\s*/, ''));
                     form.find('.wpb-summary-name').text(form.find('input[name="name"]').val());
                     form.find('.wpb-summary-email').text(form.find('input[name="email"]').val());
                     form.find('.wpb-summary-persons').text(persons);
@@ -55,7 +57,7 @@ jQuery(document).ready(function($){
             var spinner = form.find('.wpb-processing');
             btn.prop('disabled', true);
             spinner.show();
-
+          
             $.post(wpbCatalog.ajax_url, form.serialize(), function(response){
                 if(response.success){
                     Swal.fire({
