@@ -39,4 +39,5 @@ jQuery(function($){
         e.preventDefault();
         $(this).closest('tr').remove();
     });
+
 });

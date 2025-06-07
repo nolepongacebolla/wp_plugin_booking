@@ -41,6 +41,7 @@ jQuery(document).ready(function($){
                     step.find('.wpb-terms-error').hide();
                 }
             }
+
             if(valid && current < steps.length - 1){
                 current++;
                 if(form.find('.wpb-step').eq(current).hasClass('wpb-summary-step')){
@@ -90,6 +91,7 @@ jQuery(document).ready(function($){
             var spinner = form.find('.wpb-processing');
             btn.prop('disabled', true);
             spinner.show();
+
             $.post(wpbCatalog.ajax_url, form.serialize(), function(response){
                 if(response.success){
                     Swal.fire({
@@ -105,6 +107,7 @@ jQuery(document).ready(function($){
             }).always(function(){
                 spinner.hide();
                 btn.prop('disabled', false);
+
             });
         });
     });
@@ -116,6 +119,7 @@ jQuery(document).ready(function($){
         var box = $('<div class="wpb-lightbox" style="display:none"><img src="'+src+'"/></div>');
         $('body').append(box);
         box.css('display','flex').hide().fadeIn(200);
+
     });
 
     $('body').on('click', '.wpb-lightbox', function(){
