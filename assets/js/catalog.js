@@ -22,6 +22,17 @@ jQuery(document).ready(function($){
                     return false;
                 }
             });
+            var termsBox = step.find('.terms-acceptance input[type="checkbox"]');
+            if(termsBox.length){
+                if(!termsBox.is(':checked')){
+                    step.find('.wpb-terms-error').show();
+                    termsBox[0].reportValidity();
+                    valid = false;
+                } else {
+                    step.find('.wpb-terms-error').hide();
+                }
+            }
+
             if(valid && current < steps.length - 1){
                 current++;
                 if(form.find('.wpb-step').eq(current).hasClass('wpb-summary-step')){
@@ -57,7 +68,7 @@ jQuery(document).ready(function($){
             var spinner = form.find('.wpb-processing');
             btn.prop('disabled', true);
             spinner.show();
-          
+
             $.post(wpbCatalog.ajax_url, form.serialize(), function(response){
                 if(response.success){
                     Swal.fire({

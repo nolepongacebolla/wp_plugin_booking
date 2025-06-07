@@ -465,8 +465,8 @@ class WP_Plugin_Booking {
             $id        = get_the_ID();
             $remaining = $this->get_remaining_capacity( $id );
             $cats      = get_the_terms( $id, 'wpb_service_category' );
-            $gallery   = get_post_meta( $id, '_wpb_gallery', true );
-            $video     = get_post_meta( $id, '_wpb_video_url', true );
+           $gallery   = get_post_meta( $id, '_wpb_gallery', true );
+           $video     = get_post_meta( $id, '_wpb_video_url', true );
             $start     = get_post_meta( $id, '_wpb_start_date', true );
             $includes  = get_post_meta( $id, '_wpb_includes', true );
             $terms_txt = get_post_meta( $id, '_wpb_terms', true );
@@ -542,6 +542,14 @@ class WP_Plugin_Booking {
             }
             if ( $terms_txt ) {
                 echo '<details class="wpb-terms mb-3"><summary>' . esc_html__( 'Términos y condiciones', 'wp-plugin-booking' ) . '</summary>' . wpautop( wp_kses_post( $terms_txt ) ) . '</details>';
+                echo '<div class="terms-acceptance">';
+                $cid = 'wpb_accept_' . $id;
+                echo '<label class="checkbox-container">';
+                echo '<input type="checkbox" id="' . esc_attr( $cid ) . '" required />';
+                echo '<span class="checkmark"></span>' . esc_html__( 'He leído y acepto los términos y condiciones', 'wp-plugin-booking' );
+                echo '</label>';
+                echo '<div class="error-message wpb-terms-error">' . esc_html__( 'Debes aceptar los términos y condiciones', 'wp-plugin-booking' ) . '</div>';
+                echo '</div>';
             }
 
             echo '<button class="btn btn-danger wpb-next mt-3">' . esc_html__( 'Siguiente', 'wp-plugin-booking' ) . '</button>';
