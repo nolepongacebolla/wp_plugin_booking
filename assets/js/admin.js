@@ -27,4 +27,17 @@ jQuery(function($){
         });
         frame.open();
     });
+
+    $('#wpb-add-item').on('click', function(e){
+        e.preventDefault();
+        var index = $('.wpb-items-table tbody tr').length;
+        var tmpl = wp.template('wpb-item-row');
+        $('.wpb-items-table tbody').append(tmpl({i:index}));
+    });
+
+    $('.wpb-items-table').on('click', '.wpb-remove-item', function(e){
+        e.preventDefault();
+        $(this).closest('tr').remove();
+    });
+
 });

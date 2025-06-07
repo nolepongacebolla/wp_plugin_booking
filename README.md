@@ -21,6 +21,8 @@ Este repositorio contiene la estructura básica de un plugin para WordPress orie
 Al activar el plugin se registrará el tipo de contenido **Servicio** con sus categorías, un campo de precio por persona y la **capacidad máxima** disponible. También se crea un tipo de contenido **Reserva** para almacenar las solicitudes realizadas por los clientes junto con nombre, cantidad de personas, precio total, un ID único y estatus de la reserva. Todas las opciones del plugin se agrupan en el menú **WPBookingStandar**, desde donde también se accede a un apartado de ajustes.
 
 Cada servicio puede definirse desde varias cajas de metadatos para indicar precio, capacidad, fecha de inicio y textos de apoyo. También se pueden introducir los bloques **Incluye** y **Términos y condiciones** que aparecerán en el modal de reserva. La galería de imágenes se selecciona con la biblioteca de medios de WordPress y se muestra como miniaturas cuadradas que se amplían al hacer clic.
+Adicionalmente, es posible crear grupos de **Artículos** con precio y stock opcional para que el cliente elija cantidades durante la reserva.
+
 
  El plugin genera automáticamente una página de catálogo sin plantilla del tema donde los servicios se muestran usando **Bootstrap 5** y un encabezado tipo "hero" con animaciones decorativas. El diseño utiliza colores rojo, negro, amarillo y blanco y todo el texto es oscuro para que se lea correctamente. Se ofrece un filtro por categoría y un enlace de regreso al inicio. Cada servicio muestra su categoría, imagen destacada, precio en DOP, la cantidad de cupos restantes y un botón **Reservar** (o un aviso **AGOTADO** si no quedan cupos). Al final se incluye un bloque de información **Servicios Premium** con datos de contacto.
 
@@ -29,7 +31,5 @@ Se añadieron animaciones suaves entre pasos del formulario y **SweetAlert** mue
 El sistema envía un correo al cliente cuando crea una reserva y cada vez que se actualiza su estatus. El contenido de ese correo puede modificarse con HTML desde **WPBookingStandar → Ajustes**.
 Dentro del menú **WPBookingStandar** hay una sección de **Estadísticas** que muestra el total de reservas y las ganancias acumuladas.
 
-Esa pantalla permite filtrar por rango de fechas y servicio, además de generar
-gráficas de pastel con el número de reservas por estatus y una línea de ingresos
-mensuales utilizando Chart.js.
+Esa pantalla permite filtrar por rango de fechas y servicio y presenta gráficas de pastel con el número de reservas por estatus junto a una línea de ingresos mensuales utilizando Chart.js en un diseño más limpio.
 

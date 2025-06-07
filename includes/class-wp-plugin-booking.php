@@ -114,6 +114,15 @@ class WP_Plugin_Booking {
             'sanitize_callback' => 'absint',
             'auth_callback'     => function() { return current_user_can( 'edit_posts' ); },
         ) );
+
+        register_post_meta( 'wpb_service', '_wpb_items', array(
+            'type'              => 'string',
+            'single'            => true,
+            'show_in_rest'      => true,
+            'sanitize_callback' => array( $this, 'sanitize_items_meta' ),
+            'auth_callback'     => function() { return current_user_can( 'edit_posts' ); },
+        ) );
+
     }
 
     public function register_booking_cpt() {
@@ -149,6 +158,30 @@ class WP_Plugin_Booking {
     public function sanitize_float_meta( $value, $meta_key = '', $object_type = '', $object_subtype = '' ) {
         return floatval( $value );
     }
+
+    /**
+     * Sanitize items meta value stored as JSON.
+     */
+    public function sanitize_items_meta( $value, $meta_key = '', $object_type = '', $object_subtype = '' ) {
+        $items = json_decode( $value, true );
+        if ( ! is_array( $items ) ) {
+            return '';
+        }
+        $clean = array();
+        foreach ( $items as $item ) {
+            if ( empty( $item['name'] ) ) {
+                continue;
+            }
+            $clean[] = array(
+                'name'  => sanitize_text_field( $item['name'] ),
+                'price' => floatval( $item['price'] ),
+                'stock' => isset( $item['stock'] ) ? absint( $item['stock'] ) : 0,
+                'type'  => in_array( $item['type'], array( 'limited', 'unlimited', 'included' ), true ) ? $item['type'] : 'limited',
+            );
+        }
+        return wp_json_encode( $clean );
+    }
+
 
     public function add_service_meta_boxes() {
         add_meta_box(
@@ -210,6 +243,14 @@ class WP_Plugin_Booking {
             'wpb_service',
             'side'
         );
+
+        add_meta_box(
+            'wpb_items_meta',
+            __( 'Artículos/Productos', 'wp-plugin-booking' ),
+            array( $this, 'render_items_meta_box' ),
+            'wpb_service'
+        );
+
     }
 
     public function render_price_meta_box( $post ) {
@@ -265,6 +306,49 @@ class WP_Plugin_Booking {
         echo '<textarea name="wpb_terms" style="width:100%;height:120px;">' . esc_textarea( $terms ) . '</textarea>';
     }
 
+    public function render_items_meta_box( $post ) {
+        $json = get_post_meta( $post->ID, '_wpb_items', true );
+        $items = $json ? json_decode( $json, true ) : array();
+        echo '<table class="widefat wpb-items-table"><thead><tr><th>' . esc_html__( 'Nombre', 'wp-plugin-booking' ) . '</th><th>' . esc_html__( 'Precio', 'wp-plugin-booking' ) . '</th><th>' . esc_html__( 'Cantidad', 'wp-plugin-booking' ) . '</th><th>' . esc_html__( 'Tipo', 'wp-plugin-booking' ) . '</th><th></th></tr></thead><tbody>';
+        if ( $items ) {
+            foreach ( $items as $i => $item ) {
+                $this->render_item_row( $i, $item );
+            }
+        }
+        echo '</tbody></table>';
+        echo '<p><button type="button" class="button" id="wpb-add-item">' . esc_html__( 'Añadir artículo', 'wp-plugin-booking' ) . '</button></p>';
+        echo '<script type="text/html" id="tmpl-wpb-item-row">';
+        ob_start();
+        $this->render_item_row( '{{{data.i}}}', array( 'name' => '', 'price' => '', 'stock' => '', 'type' => 'limited' ) );
+        $row = ob_get_clean();
+        echo str_replace( array( '\n', '\r' ), '', $row );
+        echo '</script>';
+    }
+
+    private function render_item_row( $i, $item ) {
+        $name  = isset( $item['name'] ) ? $item['name'] : '';
+        $price = isset( $item['price'] ) ? $item['price'] : '';
+        $stock = isset( $item['stock'] ) ? $item['stock'] : '';
+        $type  = isset( $item['type'] ) ? $item['type'] : 'limited';
+        echo '<tr>';
+        echo '<td><input type="text" name="wpb_items[name][' . esc_attr( $i ) . ']" value="' . esc_attr( $name ) . '" /></td>';
+        echo '<td><input type="number" step="0.01" name="wpb_items[price][' . esc_attr( $i ) . ']" value="' . esc_attr( $price ) . '" /></td>';
+        echo '<td><input type="number" min="0" name="wpb_items[stock][' . esc_attr( $i ) . ']" value="' . esc_attr( $stock ) . '" /></td>';
+        echo '<td><select name="wpb_items[type][' . esc_attr( $i ) . ']">';
+        $options = array(
+            'limited'   => __( 'Stock limitado', 'wp-plugin-booking' ),
+            'unlimited' => __( 'Ilimitado', 'wp-plugin-booking' ),
+            'included'  => __( 'Incluido', 'wp-plugin-booking' ),
+        );
+        foreach ( $options as $val => $label ) {
+            echo '<option value="' . esc_attr( $val ) . '"' . selected( $type, $val, false ) . '>' . esc_html( $label ) . '</option>';
+        }
+        echo '</select></td>';
+        echo '<td><button type="button" class="button wpb-remove-item">&times;</button></td>';
+        echo '</tr>';
+    }
+
+
     public function save_service_meta( $post_id ) {
         if ( isset( $_POST['wpb_price_per_person'] ) ) {
             update_post_meta( $post_id, '_wpb_price_per_person', floatval( $_POST['wpb_price_per_person'] ) );
@@ -293,6 +377,27 @@ class WP_Plugin_Booking {
         if ( isset( $_POST['wpb_includes'] ) ) {
             update_post_meta( $post_id, '_wpb_includes', wp_kses_post( $_POST['wpb_includes'] ) );
         }
+        if ( isset( $_POST['wpb_items'] ) && is_array( $_POST['wpb_items'] ) ) {
+            $items = array();
+            $names  = isset( $_POST['wpb_items']['name'] ) ? (array) $_POST['wpb_items']['name'] : array();
+            $prices = isset( $_POST['wpb_items']['price'] ) ? (array) $_POST['wpb_items']['price'] : array();
+            $stocks = isset( $_POST['wpb_items']['stock'] ) ? (array) $_POST['wpb_items']['stock'] : array();
+            $types  = isset( $_POST['wpb_items']['type'] ) ? (array) $_POST['wpb_items']['type'] : array();
+            $count = max( count( $names ), count( $prices ) );
+            for ( $i = 0; $i < $count; $i++ ) {
+                if ( empty( $names[ $i ] ) ) {
+                    continue;
+                }
+                $items[] = array(
+                    'name'  => sanitize_text_field( $names[ $i ] ),
+                    'price' => floatval( $prices[ $i ] ?? 0 ),
+                    'stock' => absint( $stocks[ $i ] ?? 0 ),
+                    'type'  => in_array( $types[ $i ] ?? 'limited', array( 'limited', 'unlimited', 'included' ), true ) ? $types[ $i ] : 'limited',
+                );
+            }
+            update_post_meta( $post_id, '_wpb_items', wp_json_encode( $items ) );
+        }
+
     }
 
     public function get_remaining_capacity( $service_id ) {
@@ -343,6 +448,23 @@ class WP_Plugin_Booking {
             $total = $total * ( 1 - $discount / 100 );
         }
 
+        $items_meta = get_post_meta( $service_id, '_wpb_items', true );
+        $items_def  = $items_meta ? json_decode( $items_meta, true ) : array();
+        $items_sel  = array();
+        if ( isset( $_POST['items_qty'] ) && is_array( $_POST['items_qty'] ) ) {
+            foreach ( $_POST['items_qty'] as $index => $qty ) {
+                $qty = absint( $qty );
+                if ( isset( $items_def[ $index ] ) && $qty > 0 ) {
+                    $item = $items_def[ $index ];
+                    $items_sel[ $index ] = $qty;
+                    if ( 'included' !== $item['type'] ) {
+                        $total += $qty * floatval( $item['price'] );
+                    }
+                }
+            }
+        }
+
+
         $booking_id = wp_insert_post(
             array(
                 'post_type'   => 'wpb_booking',
@@ -363,6 +485,10 @@ class WP_Plugin_Booking {
             update_post_meta( $booking_id, '_wpb_status', 'pendiente' );
             update_post_meta( $booking_id, '_wpb_payment_method', $payment );
             update_post_meta( $booking_id, '_wpb_booking_uid', uniqid( 'resv_' ) );
+            if ( $items_sel ) {
+                update_post_meta( $booking_id, '_wpb_items_data', $items_sel );
+            }
+
             $this->send_status_email( $booking_id, 'pendiente' );
             wp_send_json_success();
         }
@@ -586,8 +712,34 @@ class WP_Plugin_Booking {
                 echo '<option value="' . $i . '">' . $i . '</option>';
             }
             echo '</select>';
+            echo '</div>';
+
+            $items_json = get_post_meta( $id, '_wpb_items', true );
+            $items      = $items_json ? json_decode( $items_json, true ) : array();
+            if ( $items ) {
+                echo '<div class="mb-3">';
+                echo '<label class="form-label">' . esc_html__( 'Artículos', 'wp-plugin-booking' ) . '</label>';
+                foreach ( $items as $idx => $item ) {
+                    $price = floatval( $item['price'] );
+                    $label = esc_html( $item['name'] ) . ( $price ? ' - RD$ ' . number_format_i18n( $price, 2 ) : '' );
+                    echo '<div class="d-flex align-items-center mb-2" data-price="' . esc_attr( $price ) . '">';
+                    echo '<span class="me-2" style="min-width:150px;">' . $label . '</span>';
+                    if ( 'included' === $item['type'] ) {
+                        $qty = absint( $item['stock'] ? $item['stock'] : 1 );
+                        echo '<span class="me-2">' . esc_html__( 'Incluido', 'wp-plugin-booking' ) . '</span>';
+                        echo '<input type="hidden" name="items_qty[' . esc_attr( $idx ) . ']" value="' . $qty . '" />';
+                    } else {
+                        $max_attr = 'unlimited' === $item['type'] ? '' : ' max="' . absint( $item['stock'] ) . '"';
+                        echo '<input type="number" class="form-control" style="width:80px;" min="0"' . $max_attr . ' name="items_qty[' . esc_attr( $idx ) . ']" value="0" />';
+                    }
+                    echo '</div>';
+                }
+                echo '</div>';
+            }
+
 
             echo '</div>';
+
             echo '<button class="btn btn-secondary wpb-prev me-2">' . esc_html__( 'Atrás', 'wp-plugin-booking' ) . '</button>';
             echo '<button class="btn btn-danger wpb-next">' . esc_html__( 'Siguiente', 'wp-plugin-booking' ) . '</button>';
             echo '</div>';
@@ -613,10 +765,11 @@ class WP_Plugin_Booking {
             echo '<div class="wpb-step wpb-summary-step">';
             echo '<p><strong>' . esc_html__( 'Servicio:', 'wp-plugin-booking' ) . '</strong> <span class="wpb-summary-service"></span></p>';
             echo '<p><strong>' . esc_html__( 'Fecha de inicio:', 'wp-plugin-booking' ) . '</strong> <span class="wpb-summary-date"></span></p>';
-
             echo '<p><strong>' . esc_html__( 'Nombre:', 'wp-plugin-booking' ) . '</strong> <span class="wpb-summary-name"></span></p>';
             echo '<p><strong>' . esc_html__( 'Email:', 'wp-plugin-booking' ) . '</strong> <span class="wpb-summary-email"></span></p>';
             echo '<p><strong>' . esc_html__( 'Personas:', 'wp-plugin-booking' ) . '</strong> <span class="wpb-summary-persons"></span></p>';
+            echo '<div class="wpb-summary-items"></div>';
+
             echo '<p><strong>' . esc_html__( 'Total:', 'wp-plugin-booking' ) . '</strong> RD$ <span class="wpb-summary-total"></span></p>';
             echo '<div class="wpb-error text-danger mb-2"></div>';
             echo '<button class="btn btn-secondary wpb-prev me-2">' . esc_html__( 'Atrás', 'wp-plugin-booking' ) . '</button>';
@@ -1061,6 +1214,15 @@ class WP_Plugin_Booking {
             'wpb-stats',
             array( $this, 'render_stats_page' )
         );
+
+        add_submenu_page(
+            'wpbookingstandar',
+            __( 'Categorías', 'wp-plugin-booking' ),
+            __( 'Categorías', 'wp-plugin-booking' ),
+            'manage_options',
+            'edit-tags.php?taxonomy=wpb_service_category&post_type=wpb_service'
+        );
+
     }
 
     /**
@@ -1133,15 +1295,16 @@ class WP_Plugin_Booking {
         submit_button( __( 'Filtrar', 'wp-plugin-booking' ), 'secondary', '', false );
         echo '</form>';
 
-
+        echo '<div class="wpb-stats-summary">';
         echo '<p>' . sprintf( esc_html__( 'Reservas totales: %d', 'wp-plugin-booking' ), count( $bookings ) ) . '</p>';
-        $price_html = function_exists( 'wc_price' )
-            ? wc_price( $total, array( 'currency' => 'DOP' ) )
-            : number_format_i18n( $total, 2 ) . ' DOP';
+        $price_html = function_exists( 'wc_price' ) ? wc_price( $total, array( 'currency' => 'DOP' ) ) : number_format_i18n( $total, 2 ) . ' DOP';
         echo '<p>' . sprintf( esc_html__( 'Ganancias totales: %s', 'wp-plugin-booking' ), $price_html ) . '</p>';
+        echo '</div>';
 
-        echo '<canvas id="wpb-status-chart" style="max-width:400px;"></canvas>';
-        echo '<canvas id="wpb-revenue-chart" style="max-width:600px;"></canvas>';
+        echo '<div class="wpb-stats-charts" style="display:flex;gap:40px;flex-wrap:wrap;margin-top:20px;">';
+        echo '<canvas id="wpb-status-chart" width="300" height="300"></canvas>';
+        echo '<canvas id="wpb-revenue-chart" width="500" height="300"></canvas>';
+        echo '</div>';
 
 
         echo '<table class="widefat"><thead><tr><th>' . esc_html__( 'Estatus', 'wp-plugin-booking' ) . '</th><th>' . esc_html__( 'Cantidad', 'wp-plugin-booking' ) . '</th></tr></thead><tbody>';

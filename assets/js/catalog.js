@@ -42,6 +42,21 @@ jQuery(document).ready(function($){
                     if(discount && persons >= minDisc){
                         total = total * (1 - discount/100);
                     }
+                    var itemsSummary = '';
+                    form.find('input[name^="items_qty"]').each(function(){
+                        var qty = parseInt($(this).val()) || 0;
+                        if(qty>0){
+                            var idx = $(this).attr('name').match(/\[(\d+)\]/)[1];
+                            var row = $(this).closest('.d-flex');
+                            var label = row.find('span:first').text();
+                            var priceItem = parseFloat(row.data('price')) || 0;
+                            if(!row.find('span:first').length){ label=''; }
+                            if(priceItem){ total += qty*priceItem; }
+                            itemsSummary += '<p>'+label+': '+qty+'</p>';
+                        }
+                    });
+                    form.find('.wpb-summary-items').html(itemsSummary);
+
                     form.find('.wpb-summary-service').text(form.closest('.modal').find('.wpb-modal-service-title').text());
                     form.find('.wpb-summary-date').text(form.closest('.modal').find('.wpb-modal-service-title').next('.mb-2').text().replace(/^[^:]*:\s*/, ''));
                     form.find('.wpb-summary-name').text(form.find('input[name="name"]').val());
