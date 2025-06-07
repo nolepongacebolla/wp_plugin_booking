@@ -1067,62 +1067,142 @@ class WP_Plugin_Booking {
      * Display simple booking statistics.
      */
     public function render_stats_page() {
-        $bookings = get_posts( array(
+        $from  = isset( $_GET['from'] ) ? sanitize_text_field( wp_unslash( $_GET['from'] ) ) : '';
+        $to    = isset( $_GET['to'] ) ? sanitize_text_field( wp_unslash( $_GET['to'] ) ) : '';
+        $srv   = isset( $_GET['service'] ) ? absint( $_GET['service'] ) : 0;
+
+        $args = array(
             'post_type'   => 'wpb_booking',
             'numberposts' => -1,
-        ) );
+        );
+        if ( $from || $to ) {
+            $range = array();
+            if ( $from ) { $range['after'] = $from; }
+            if ( $to ) { $range['before'] = $to; }
+            $args['date_query'] = array( $range );
+        }
+        if ( $srv ) {
+            $args['meta_query'][] = array(
+                'key'   => '_wpb_service_id',
+                'value' => $srv,
+            );
+        }
 
-        $total       = 0;
+        $bookings = get_posts( $args );
+
+        $total         = 0;
         $status_totals = array();
+        $monthly_rev   = array();
+
         foreach ( $bookings as $booking ) {
             $price  = floatval( get_post_meta( $booking->ID, '_wpb_total_price', true ) );
             $status = get_post_meta( $booking->ID, '_wpb_status', true );
+            $date   = $booking->post_date;
+            $month  = date_i18n( 'Y-m', strtotime( $date ) );
             $total += $price;
+
+
             if ( ! isset( $status_totals[ $status ] ) ) {
                 $status_totals[ $status ] = 0;
             }
             $status_totals[ $status ]++;
+
+            if ( ! isset( $monthly_rev[ $month ] ) ) {
+                $monthly_rev[ $month ] = 0;
+            }
+            $monthly_rev[ $month ] += $price;
         }
+
+        ksort( $monthly_rev );
 
         echo '<div class="wrap">';
         echo '<h1>' . esc_html__( 'Estadisticas', 'wp-plugin-booking' ) . '</h1>';
+
+        echo '<form method="get" class="wpb-stats-filter">';
+        echo '<input type="hidden" name="page" value="wpb-stats" />';
+        echo '<label>' . esc_html__( 'Desde', 'wp-plugin-booking' ) . ' <input type="date" name="from" value="' . esc_attr( $from ) . '" /></label> ';
+        echo '<label>' . esc_html__( 'Hasta', 'wp-plugin-booking' ) . ' <input type="date" name="to" value="' . esc_attr( $to ) . '" /></label> ';
+        echo '<label>' . esc_html__( 'Servicio', 'wp-plugin-booking' ) . ' '; 
+        wp_dropdown_pages( array(
+            'post_type'        => 'wpb_service',
+            'name'             => 'service',
+            'show_option_all'  => __( 'Todos', 'wp-plugin-booking' ),
+            'selected'         => $srv,
+        ) );
+        echo '</label> '; 
+        submit_button( __( 'Filtrar', 'wp-plugin-booking' ), 'secondary', '', false );
+        echo '</form>';
+
+
         echo '<p>' . sprintf( esc_html__( 'Reservas totales: %d', 'wp-plugin-booking' ), count( $bookings ) ) . '</p>';
         $price_html = function_exists( 'wc_price' )
             ? wc_price( $total, array( 'currency' => 'DOP' ) )
             : number_format_i18n( $total, 2 ) . ' DOP';
         echo '<p>' . sprintf( esc_html__( 'Ganancias totales: %s', 'wp-plugin-booking' ), $price_html ) . '</p>';
+
+        echo '<canvas id="wpb-status-chart" style="max-width:400px;"></canvas>';
+        echo '<canvas id="wpb-revenue-chart" style="max-width:600px;"></canvas>';
+
+
         echo '<table class="widefat"><thead><tr><th>' . esc_html__( 'Estatus', 'wp-plugin-booking' ) . '</th><th>' . esc_html__( 'Cantidad', 'wp-plugin-booking' ) . '</th></tr></thead><tbody>';
         foreach ( $status_totals as $st => $count ) {
             echo '<tr><td>' . esc_html( ucfirst( $st ) ) . '</td><td>' . esc_html( $count ) . '</td></tr>';
         }
         echo '</tbody></table>';
         echo '</div>';
+
+        $status_labels = array_map( 'ucfirst', array_keys( $status_totals ) );
+        $status_counts = array_values( $status_totals );
+        $month_labels  = array_keys( $monthly_rev );
+        $month_values  = array_values( $monthly_rev );
+
+        wp_localize_script( 'wpb-stats', 'wpbStats', array(
+            'statusLabels'  => array_values( $status_labels ),
+            'statusCounts'  => array_values( $status_counts ),
+            'monthLabels'   => array_values( $month_labels ),
+            'monthRevenue'  => array_values( $month_values ),
+            'revenueLabel'  => __( 'Ingresos', 'wp-plugin-booking' ),
+        ) );
+
     }
 
     /**
      * Enqueue scripts for media selection on service edit screens.
      */
     public function admin_enqueue_scripts( $hook ) {
-        if ( in_array( $hook, array( 'post.php', 'post-new.php' ), true ) ) {
-            $screen = get_current_screen();
-            if ( $screen && 'wpb_service' === $screen->post_type ) {
-                wp_enqueue_media();
-                wp_enqueue_script(
-                    'wpb-admin',
-                    WP_PLUGIN_BOOKING_URL . 'assets/js/admin.js',
-                    array( 'jquery' ),
-                    WP_PLUGIN_BOOKING_VERSION,
-                    true
-                );
-                wp_localize_script(
-                    'wpb-admin',
-                    'wpbGallery',
-                    array(
-                        'select' => __( 'Seleccionar imágenes', 'wp-plugin-booking' ),
-                        'use'    => __( 'Usar imágenes', 'wp-plugin-booking' ),
-                    )
-                );
-            }
+        $screen = get_current_screen();
+
+        // Media selector for services.
+        if ( in_array( $hook, array( 'post.php', 'post-new.php' ), true ) && $screen && 'wpb_service' === $screen->post_type ) {
+            wp_enqueue_media();
+            wp_enqueue_script(
+                'wpb-admin',
+                WP_PLUGIN_BOOKING_URL . 'assets/js/admin.js',
+                array( 'jquery' ),
+                WP_PLUGIN_BOOKING_VERSION,
+                true
+            );
+            wp_localize_script(
+                'wpb-admin',
+                'wpbGallery',
+                array(
+                    'select' => __( 'Seleccionar imágenes', 'wp-plugin-booking' ),
+                    'use'    => __( 'Usar imágenes', 'wp-plugin-booking' ),
+                )
+            );
+        }
+
+        // Statistics page scripts.
+        if ( $screen && 'wpbookingstandar_page_wpb-stats' === $screen->id ) {
+            wp_enqueue_script( 'chart-js', 'https://cdn.jsdelivr.net/npm/chart.js', array(), '4.4.1', true );
+            wp_enqueue_script(
+                'wpb-stats',
+                WP_PLUGIN_BOOKING_URL . 'assets/js/stats.js',
+                array( 'jquery', 'chart-js' ),
+                WP_PLUGIN_BOOKING_VERSION,
+                true
+            );
+
         }
     }
 
