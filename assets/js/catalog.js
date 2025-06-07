@@ -11,6 +11,16 @@ jQuery(document).ready(function($){
         }
         showStep(0);
 
+        form.closest('.modal').on('hidden.bs.modal', function(){
+            current = 0;
+            form[0].reset();
+            form.find('.wpb-terms-error').hide();
+            form.find('.wpb-summary-items').empty();
+            form.find('.wpb-processing').hide();
+            showStep(0);
+        });
+
+
         form.on('click', '.wpb-next', function(e){
             e.preventDefault();
             var step = steps.eq(current);

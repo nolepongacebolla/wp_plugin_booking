@@ -78,6 +78,13 @@
   display: none;
   opacity: 0;
   transition: opacity 0.3s ease;
+  animation: fadeStep 0.3s ease;
+}
+
+@keyframes fadeStep {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+
 }
 .wpb-step.active {
   display: block;
@@ -117,6 +124,21 @@
   display:block;
   margin:auto;
 }
+
+.modal-content{
+  border-radius:10px;
+  border:1px solid var(--wpb-primary);
+  box-shadow:0 6px 20px rgba(0,0,0,0.3);
+}
+.modal-header{
+  background:var(--wpb-primary);
+  color:#fff;
+  border-bottom:1px solid var(--wpb-primary);
+}
+.modal-header .btn-close{
+  filter:invert(1);
+}
+
 .wpb-modal-service-title { font-size:1.5rem; }
 .wpb-terms summary { cursor:pointer; font-weight:bold; }
 .wpb-includes { background:#f8f9fa; padding:10px; border-radius:8px; }

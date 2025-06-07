@@ -677,8 +677,8 @@ class WP_Plugin_Booking {
                 echo '<div class="error-message wpb-terms-error">' . esc_html__( 'Debes aceptar los términos y condiciones', 'wp-plugin-booking' ) . '</div>';
                 echo '</div>';
             }
+            echo '<button type="button" class="btn btn-danger wpb-next mt-3">' . esc_html__( 'Siguiente', 'wp-plugin-booking' ) . '</button>';
 
-            echo '<button class="btn btn-danger wpb-next mt-3">' . esc_html__( 'Siguiente', 'wp-plugin-booking' ) . '</button>';
             echo '</div>';
 
             echo '<div class="wpb-step">';
@@ -695,12 +695,12 @@ class WP_Plugin_Booking {
             echo '<input type="text" class="form-control" name="phone" required />';
             echo '</div>';
             echo '<div class="mb-3">';
-
             echo '<label class="form-label">' . esc_html__( 'Email', 'wp-plugin-booking' ) . '</label>';
             echo '<input type="email" class="form-control" name="email" required />';
             echo '</div>';
-            echo '<button class="btn btn-secondary wpb-prev me-2">' . esc_html__( 'Atrás', 'wp-plugin-booking' ) . '</button>';
-            echo '<button class="btn btn-danger wpb-next">' . esc_html__( 'Siguiente', 'wp-plugin-booking' ) . '</button>';
+            echo '<button type="button" class="btn btn-secondary wpb-prev me-2">' . esc_html__( 'Atrás', 'wp-plugin-booking' ) . '</button>';
+            echo '<button type="button" class="btn btn-danger wpb-next">' . esc_html__( 'Siguiente', 'wp-plugin-booking' ) . '</button>';
+
             echo '</div>';
 
             echo '<div class="wpb-step">';
@@ -737,11 +737,9 @@ class WP_Plugin_Booking {
                 echo '</div>';
             }
 
+            echo '<button type="button" class="btn btn-secondary wpb-prev me-2">' . esc_html__( 'Atrás', 'wp-plugin-booking' ) . '</button>';
+            echo '<button type="button" class="btn btn-danger wpb-next">' . esc_html__( 'Siguiente', 'wp-plugin-booking' ) . '</button>';
 
-            echo '</div>';
-
-            echo '<button class="btn btn-secondary wpb-prev me-2">' . esc_html__( 'Atrás', 'wp-plugin-booking' ) . '</button>';
-            echo '<button class="btn btn-danger wpb-next">' . esc_html__( 'Siguiente', 'wp-plugin-booking' ) . '</button>';
             echo '</div>';
 
             echo '<div class="wpb-step">';
@@ -758,8 +756,9 @@ class WP_Plugin_Booking {
                 echo '</div>';
             }
             echo '</div>';
-            echo '<button class="btn btn-secondary wpb-prev me-2">' . esc_html__( 'Atrás', 'wp-plugin-booking' ) . '</button>';
-            echo '<button class="btn btn-danger wpb-next">' . esc_html__( 'Siguiente', 'wp-plugin-booking' ) . '</button>';
+            echo '<button type="button" class="btn btn-secondary wpb-prev me-2">' . esc_html__( 'Atrás', 'wp-plugin-booking' ) . '</button>';
+            echo '<button type="button" class="btn btn-danger wpb-next">' . esc_html__( 'Siguiente', 'wp-plugin-booking' ) . '</button>';
+
             echo '</div>';
 
             echo '<div class="wpb-step wpb-summary-step">';
@@ -769,10 +768,9 @@ class WP_Plugin_Booking {
             echo '<p><strong>' . esc_html__( 'Email:', 'wp-plugin-booking' ) . '</strong> <span class="wpb-summary-email"></span></p>';
             echo '<p><strong>' . esc_html__( 'Personas:', 'wp-plugin-booking' ) . '</strong> <span class="wpb-summary-persons"></span></p>';
             echo '<div class="wpb-summary-items"></div>';
-
             echo '<p><strong>' . esc_html__( 'Total:', 'wp-plugin-booking' ) . '</strong> RD$ <span class="wpb-summary-total"></span></p>';
             echo '<div class="wpb-error text-danger mb-2"></div>';
-            echo '<button class="btn btn-secondary wpb-prev me-2">' . esc_html__( 'Atrás', 'wp-plugin-booking' ) . '</button>';
+            echo '<button type="button" class="btn btn-secondary wpb-prev me-2">' . esc_html__( 'Atrás', 'wp-plugin-booking' ) . '</button>';
             echo '<button type="submit" class="btn btn-danger wpb-confirm">' . esc_html__( 'Confirmar Reserva', 'wp-plugin-booking' ) . '</button>';
             echo '<div class="wpb-processing mt-3"><div class="spinner-border text-danger" role="status"><span class="visually-hidden">' . esc_html__( 'Procesando...', 'wp-plugin-booking' ) . '</span></div><span class="ms-2">' . esc_html__( 'Procesando, por favor espere...', 'wp-plugin-booking' ) . '</span></div>';
 
