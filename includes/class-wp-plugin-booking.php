@@ -122,7 +122,6 @@ class WP_Plugin_Booking {
             'sanitize_callback' => array( $this, 'sanitize_items_meta' ),
             'auth_callback'     => function() { return current_user_can( 'edit_posts' ); },
         ) );
-
     }
 
     public function register_booking_cpt() {
@@ -1090,7 +1089,6 @@ class WP_Plugin_Booking {
         add_settings_section( 'wpb_frontpage', __( 'Textos de Portada', 'wp-plugin-booking' ), null, 'wpb-frontpage' );
         add_settings_section( 'wpb_modal', __( 'Diseño del Modal de Reserva', 'wp-plugin-booking' ), null, 'wpb-modal' );
 
-
         add_settings_field(
             'wpb_payment_methods',
             __( 'Métodos de pago (separados por coma)', 'wp-plugin-booking' ),
@@ -1319,7 +1317,6 @@ class WP_Plugin_Booking {
         $value = get_option( 'wpb_modal_custom_css', '' );
         echo '<textarea name="wpb_modal_custom_css" rows="5" class="large-text code">' . esc_textarea( $value ) . '</textarea>';
     }
-
 
     /**
      * Output settings page markup.

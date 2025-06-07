@@ -1,10 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
 :root {
-  --wpb-primary: #dc3545;
-  --wpb-dark: #000000;
-  --wpb-light: #ffffff;
-  --wpb-accent: #ffc107;
+  --wpb-primary: #e1b12c;
+  --wpb-dark: #2f3640;
+  --wpb-dark-alt: #353b48;
+  --wpb-light: #f5f6fa;
+  --wpb-accent: #fbc531;
+
 
   /* Modal design variables */
   --wpb-modal-font-family: 'Poppins', sans-serif;
@@ -12,9 +14,10 @@
   --wpb-modal-text-color: #444444;
   --wpb-modal-title-color: #000000;
   --wpb-modal-bg: #ffffff;
-  --wpb-modal-border: #dc3545;
-  --wpb-modal-next-bg: #dc3545;
-  --wpb-modal-close-color: #000000;
+  --wpb-modal-border: var(--wpb-primary);
+  --wpb-modal-next-bg: var(--wpb-primary);
+  --wpb-modal-close-color: var(--wpb-dark);
+
 
   --wpb-include-display: block;
   --wpb-include-bg: #f9f9f9;
@@ -33,6 +36,7 @@
   --wpb-checkbox-bg: #ffffff;
   --wpb-checkbox-font-style: normal;
   --wpb-checkbox-font-weight: normal;
+}
 
 
 .wpb-catalog-page {
@@ -112,7 +116,6 @@
   font-family: var(--wpb-modal-font-family);
   font-size: var(--wpb-modal-font-size);
   color: var(--wpb-modal-text-color);
-
 }
 
 @keyframes fadeStep {
@@ -150,6 +153,7 @@
   margin: 0 var(--wpb-img-spacing) var(--wpb-img-spacing) 0;
   cursor: pointer;
   border-radius: var(--wpb-img-radius);
+}
 
 
 /* Lightbox styles */

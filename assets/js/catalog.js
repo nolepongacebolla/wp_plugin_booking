@@ -119,10 +119,14 @@ jQuery(document).ready(function($){
         var box = $('<div class="wpb-lightbox" style="display:none"><img src="'+src+'"/></div>');
         $('body').append(box);
         box.css('display','flex').hide().fadeIn(200);
-
+        $(document).on('keydown.wpbLightbox', function(ev){
+            if(ev.key === 'Escape'){ box.click(); }
+        });
     });
 
     $('body').on('click', '.wpb-lightbox', function(){
+        $(document).off('keydown.wpbLightbox');
+
         $(this).fadeOut(200, function(){ $(this).remove(); });
     });
 });
