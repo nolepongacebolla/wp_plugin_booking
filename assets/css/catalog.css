@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
 :root {
   --wpb-primary: #dc3545;
   --wpb-dark: #000000;
@@ -137,10 +139,29 @@
 .modal-header .btn-close{
   filter:invert(1);
 }
-
 .wpb-modal-service-title { font-size:1.5rem; }
 .wpb-terms summary { cursor:pointer; font-weight:bold; }
-.wpb-includes { background:#f8f9fa; padding:10px; border-radius:8px; }
+.wpb-description {
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  color: #444;
+  line-height: 1.6;
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.wpb-includes {
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  color: #444;
+  line-height: 1.6;
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+}
+
 .terms-acceptance { margin-top:20px; }
 .checkbox-container { display:flex; align-items:center; cursor:pointer; font-size:14px; color:#333; }
 .checkbox-container input { display:none; }

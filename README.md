@@ -20,7 +20,7 @@ Este repositorio contiene la estructura básica de un plugin para WordPress orie
 
 Al activar el plugin se registrará el tipo de contenido **Servicio** con sus categorías, un campo de precio por persona y la **capacidad máxima** disponible. También se crea un tipo de contenido **Reserva** para almacenar las solicitudes realizadas por los clientes junto con nombre, cantidad de personas, precio total, un ID único y estatus de la reserva. Todas las opciones del plugin se agrupan en el menú **WPBookingStandar**, desde donde también se accede a un apartado de ajustes.
 
-Cada servicio puede definirse desde varias cajas de metadatos para indicar precio, capacidad, fecha de inicio y textos de apoyo. También se pueden introducir los bloques **Incluye** y **Términos y condiciones** que aparecerán en el modal de reserva. La galería de imágenes se selecciona con la biblioteca de medios de WordPress y se muestra como miniaturas cuadradas que se amplían al hacer clic.
+ Cada servicio puede definirse desde varias cajas de metadatos para indicar precio, capacidad, fecha de inicio y textos de apoyo. También se pueden introducir los bloques **Incluye** y **Términos y condiciones** que aparecerán en el modal de reserva. La galería de imágenes se selecciona con la biblioteca de medios de WordPress y se muestra como miniaturas cuadradas que se amplían al hacer clic. El texto descriptivo y el bloque **Incluye** usan la fuente **Poppins** con un fondo claro para una lectura más cómoda.
 Adicionalmente, es posible crear grupos de **Artículos** con precio y stock opcional para que el cliente elija cantidades durante la reserva.
 
 

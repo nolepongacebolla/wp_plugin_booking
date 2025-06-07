@@ -182,7 +182,6 @@ class WP_Plugin_Booking {
         return wp_json_encode( $clean );
     }
 
-
     public function add_service_meta_boxes() {
         add_meta_box(
             'wpb_price_meta',
@@ -349,6 +348,10 @@ class WP_Plugin_Booking {
     }
 
 
+  
+  
+  
+  
     public function save_service_meta( $post_id ) {
         if ( isset( $_POST['wpb_price_per_person'] ) ) {
             update_post_meta( $post_id, '_wpb_price_per_person', floatval( $_POST['wpb_price_per_person'] ) );
@@ -723,9 +726,13 @@ class WP_Plugin_Booking {
                     echo '<div class="ratio ratio-16x9 mb-3">' . $embed . '</div>';
                 }
             }
-            echo apply_filters( 'the_content', get_the_content() );
+            echo '<div class="wpb-description mb-3">' . apply_filters( 'the_content', get_the_content() ) . '</div>';
             if ( $includes ) {
-                echo '<div class="mb-3 wpb-includes">' . wpautop( wp_kses_post( $includes ) ) . '</div>';
+                echo '<div class="mb-3 wpb-includes">';
+                echo '<h5 class="fw-bold mb-2">' . esc_html__( 'Incluye:', 'wp-plugin-booking' ) . '</h5>';
+                echo wpautop( wp_kses_post( $includes ) );
+                echo '</div>';
+
             }
             if ( $terms_txt ) {
                 echo '<details class="wpb-terms mb-3"><summary>' . esc_html__( 'Términos y condiciones', 'wp-plugin-booking' ) . '</summary>' . wpautop( wp_kses_post( $terms_txt ) ) . '</details>';
@@ -1047,7 +1054,6 @@ class WP_Plugin_Booking {
             'wpb-frontpage',
             'wpb_frontpage'
         );
-
     }
 
     /**
