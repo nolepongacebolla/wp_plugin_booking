@@ -20,6 +20,7 @@ jQuery(document).ready(function($){
             showStep(0);
         });
 
+
         form.on('click', '.wpb-next', function(e){
             e.preventDefault();
             var step = steps.eq(current);
@@ -41,6 +42,7 @@ jQuery(document).ready(function($){
                     step.find('.wpb-terms-error').hide();
                 }
             }
+
             if(valid && current < steps.length - 1){
                 current++;
                 if(form.find('.wpb-step').eq(current).hasClass('wpb-summary-step')){
@@ -64,6 +66,7 @@ jQuery(document).ready(function($){
                         }
                     });
                     form.find('.wpb-summary-items').html(itemsSummary);
+
                     form.find('.wpb-summary-service').text(form.closest('.modal').find('.wpb-modal-service-title').text());
                     form.find('.wpb-summary-date').text(form.closest('.modal').find('.wpb-modal-service-title').next('.mb-2').text().replace(/^[^:]*:\s*/, ''));
                     form.find('.wpb-summary-name').text(form.find('input[name="name"]').val());
@@ -90,6 +93,7 @@ jQuery(document).ready(function($){
             var spinner = form.find('.wpb-processing');
             btn.prop('disabled', true);
             spinner.show();
+
             $.post(wpbCatalog.ajax_url, form.serialize(), function(response){
                 if(response.success){
                     Swal.fire({
@@ -105,6 +109,7 @@ jQuery(document).ready(function($){
             }).always(function(){
                 spinner.hide();
                 btn.prop('disabled', false);
+
             });
         });
     });
@@ -116,6 +121,7 @@ jQuery(document).ready(function($){
         var box = $('<div class="wpb-lightbox" style="display:none"><img src="'+src+'"/></div>');
         $('body').append(box);
         box.css('display','flex').hide().fadeIn(200);
+
     });
 
     $('body').on('click', '.wpb-lightbox', function(){

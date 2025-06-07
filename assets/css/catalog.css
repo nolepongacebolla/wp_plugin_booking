@@ -84,6 +84,7 @@
 @keyframes fadeStep {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: none; }
+
 }
 .wpb-step.active {
   display: block;
@@ -123,6 +124,7 @@
   display:block;
   margin:auto;
 }
+
 .modal-content{
   border-radius:10px;
   border:1px solid var(--wpb-primary);
@@ -136,6 +138,7 @@
 .modal-header .btn-close{
   filter:invert(1);
 }
+
 .wpb-modal-service-title { font-size:1.5rem; }
 .wpb-terms summary { cursor:pointer; font-weight:bold; }
 .wpb-includes { background:#f8f9fa; padding:10px; border-radius:8px; }
@@ -146,6 +149,7 @@
 .checkbox-container input:checked + .checkmark { background:linear-gradient(45deg,#667eea,#764ba2); border-color:#667eea; }
 .checkbox-container input:checked + .checkmark::after { content:'\2713'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:white; font-size:12px; font-weight:bold; }
 .error-message { color:#e74c3c; font-size:14px; margin-top:5px; display:none; }
+
 
 /* Hero header and premium styles from sample template */
 .wpb-catalog-page {
