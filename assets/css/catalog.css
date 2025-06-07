@@ -7,7 +7,6 @@
   --wpb-light: #f5f6fa;
   --wpb-accent: #fbc531;
 
-
   /* Modal design variables */
   --wpb-modal-font-family: 'Poppins', sans-serif;
   --wpb-modal-font-size: 16px;
@@ -17,7 +16,6 @@
   --wpb-modal-border: var(--wpb-primary);
   --wpb-modal-next-bg: var(--wpb-primary);
   --wpb-modal-close-color: var(--wpb-dark);
-
 
   --wpb-include-display: block;
   --wpb-include-bg: #f9f9f9;
@@ -155,7 +153,6 @@
   border-radius: var(--wpb-img-radius);
 }
 
-
 /* Lightbox styles */
 .wpb-lightbox {
   display:none;
@@ -194,6 +191,8 @@
   filter:none;
 }
 .wpb-modal-service-title { font-size:1.5rem; }
+.wpb-desc-header { color: var(--wpb-modal-title-color); font-weight:bold; }
+
 .wpb-terms summary { cursor:pointer; font-weight:bold; }
 .wpb-description {
   font-family: var(--wpb-modal-font-family);
