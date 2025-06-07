@@ -248,6 +248,7 @@ class WP_Plugin_Booking {
             array( $this, 'render_items_meta_box' ),
             'wpb_service'
         );
+
     }
 
     public function render_price_meta_box( $post ) {
@@ -345,6 +346,7 @@ class WP_Plugin_Booking {
         echo '</tr>';
     }
 
+
     public function save_service_meta( $post_id ) {
         if ( isset( $_POST['wpb_price_per_person'] ) ) {
             update_post_meta( $post_id, '_wpb_price_per_person', floatval( $_POST['wpb_price_per_person'] ) );
@@ -393,6 +395,7 @@ class WP_Plugin_Booking {
             }
             update_post_meta( $post_id, '_wpb_items', wp_json_encode( $items ) );
         }
+
     }
 
     public function get_remaining_capacity( $service_id ) {
@@ -499,6 +502,7 @@ class WP_Plugin_Booking {
         $items_def       = $items_meta ? json_decode( $items_meta, true ) : array();
         $items_remaining = $this->get_remaining_items_stock( $service_id );
         $items_sel       = array();
+
         if ( isset( $_POST['items_qty'] ) && is_array( $_POST['items_qty'] ) ) {
             foreach ( $_POST['items_qty'] as $index => $qty ) {
                 $qty = absint( $qty );
@@ -510,6 +514,7 @@ class WP_Plugin_Booking {
                             wp_send_json_error( array( 'message' => sprintf( __( 'Stock insuficiente para %s. Quedan %d.', 'wp-plugin-booking' ), $item['name'], $avail ) ) );
                         }
                     }
+
                     $items_sel[ $index ] = $qty;
                     if ( 'included' !== $item['type'] ) {
                         $total += $qty * floatval( $item['price'] );
@@ -517,6 +522,7 @@ class WP_Plugin_Booking {
                 }
             }
         }
+
 
         $booking_id = wp_insert_post(
             array(
@@ -541,6 +547,7 @@ class WP_Plugin_Booking {
             if ( $items_sel ) {
                 update_post_meta( $booking_id, '_wpb_items_data', $items_sel );
             }
+
             $this->send_status_email( $booking_id, 'pendiente' );
             wp_send_json_success();
         }
@@ -586,6 +593,7 @@ class WP_Plugin_Booking {
         if ( $custom_css ) {
             wp_add_inline_style( 'wpb-catalog', $custom_css );
         }
+
         wp_enqueue_script( 'wpb-catalog', WP_PLUGIN_BOOKING_URL . 'assets/js/catalog.js', array( 'jquery' ), WP_PLUGIN_BOOKING_VERSION, true );
         wp_localize_script( 'wpb-catalog', 'wpbCatalog', array(
             'ajax_url' => admin_url( 'admin-ajax.php' ),
@@ -622,6 +630,7 @@ class WP_Plugin_Booking {
         echo '</div></header>';
         echo '<div class="d-flex justify-content-between align-items-center mb-4 wpb-catalog-search">';
         echo '<form class="row g-2" method="get">';
+
         $terms = get_terms( array( 'taxonomy' => 'wpb_service_category', 'hide_empty' => false ) );
         echo '<div class="col">';
         echo '<select name="category" class="form-select"><option value="">' . esc_html__( 'Todas las categorías', 'wp-plugin-booking' ) . '</option>';
@@ -636,6 +645,7 @@ class WP_Plugin_Booking {
         echo '</div>';
         echo '</form>';
         echo '<div class="text-end mt-3"><a href="' . esc_url( home_url() ) . '" class="btn btn-outline-dark">' . esc_html__( 'Inicio', 'wp-plugin-booking' ) . '</a></div>';
+
         echo '</div>';
 
         echo '<div class="row wpb-catalog">';
@@ -650,10 +660,12 @@ class WP_Plugin_Booking {
             $start     = get_post_meta( $id, '_wpb_start_date', true );
             $includes  = get_post_meta( $id, '_wpb_includes', true );
             $terms_txt = get_post_meta( $id, '_wpb_terms', true );
+
             $discount  = floatval( get_post_meta( $id, '_wpb_discount_percent', true ) );
             $disc_min  = absint( get_post_meta( $id, '_wpb_discount_min', true ) );
             echo '<div class="col-md-6 col-lg-4 mb-4 wpb-service">';
             echo '<div class="card service-card rounded-4 h-100">';
+
             echo get_the_post_thumbnail( $id, 'medium', array( 'class' => 'card-img-top' ) );
             echo '<div class="card-body d-flex flex-column">';
             if ( $cats && ! is_wp_error( $cats ) ) {
@@ -661,6 +673,7 @@ class WP_Plugin_Booking {
                 echo '<span class="badge bg-secondary mb-2">' . esc_html( $first->name ) . '</span>';
             }
             echo '<h5 class="card-title">' . esc_html( get_the_title() ) . '</h5>';
+
             if ( $price ) {
                 $price_html = function_exists( 'wc_price' )
                     ? wc_price( $price, array( 'currency' => 'DOP' ) )
@@ -676,6 +689,7 @@ class WP_Plugin_Booking {
             echo '</div>'; // card-body
             echo '</div>'; // card
             echo '<div class="modal fade" id="wpb-modal-' . esc_attr( $id ) . '" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">';
+
             echo '<div class="modal-dialog modal-dialog-centered modal-lg">';
             echo '<div class="modal-content">';
             echo '<div class="modal-header">';
@@ -684,6 +698,7 @@ class WP_Plugin_Booking {
             echo '</div>';
             echo '<div class="modal-body">';
             echo '<form class="wpb-booking-form" data-price="' . esc_attr( $price ) . '" data-discount="' . esc_attr( $discount ) . '" data-discountmin="' . esc_attr( $disc_min ) . '">';
+
             echo '<input type="hidden" name="action" value="wpb_create_booking" />';
             echo '<input type="hidden" name="nonce" value="' . esc_attr( wp_create_nonce( 'wpb_booking_nonce' ) ) . '" />';
             echo '<input type="hidden" name="service_id" value="' . esc_attr( $id ) . '" />';
@@ -693,6 +708,7 @@ class WP_Plugin_Booking {
             if ( $start ) {
                 echo '<p class="mb-2"><strong>' . esc_html__( 'Fecha de inicio:', 'wp-plugin-booking' ) . '</strong> ' . esc_html( $start ) . '</p>';
             }
+
             if ( $gallery ) {
                 $ids = array_filter( array_map( 'absint', explode( ',', $gallery ) ) );
                 foreach ( $ids as $img_id ) {
@@ -717,6 +733,7 @@ class WP_Plugin_Booking {
                 echo '<h5 class="fw-bold mb-2">' . esc_html( $inc_header ) . '</h5>';
                 echo wpautop( wp_kses_post( $includes ) );
                 echo '</div>';
+
             }
             if ( $terms_txt ) {
                 echo '<details class="wpb-terms mb-3"><summary>' . esc_html__( 'Términos y condiciones', 'wp-plugin-booking' ) . '</summary>' . wpautop( wp_kses_post( $terms_txt ) ) . '</details>';
@@ -726,11 +743,13 @@ class WP_Plugin_Booking {
                 echo '<input type="checkbox" id="' . esc_attr( $cid ) . '" required />';
                 $chk_txt = get_option( 'wpb_checkbox_text', __( 'He leído y acepto los términos y condiciones', 'wp-plugin-booking' ) );
                 echo '<span class="checkmark"></span>' . esc_html( $chk_txt );
+
                 echo '</label>';
                 echo '<div class="error-message wpb-terms-error">' . esc_html__( 'Debes aceptar los términos y condiciones', 'wp-plugin-booking' ) . '</div>';
                 echo '</div>';
             }
             echo '<button type="button" class="btn btn-danger wpb-next mt-3">' . esc_html__( 'Siguiente', 'wp-plugin-booking' ) . '</button>';
+
             echo '</div>';
 
             echo '<div class="wpb-step">';
@@ -752,6 +771,7 @@ class WP_Plugin_Booking {
             echo '</div>';
             echo '<button type="button" class="btn btn-secondary wpb-prev me-2">' . esc_html__( 'Atrás', 'wp-plugin-booking' ) . '</button>';
             echo '<button type="button" class="btn btn-danger wpb-next">' . esc_html__( 'Siguiente', 'wp-plugin-booking' ) . '</button>';
+
             echo '</div>';
 
             echo '<div class="wpb-step">';
@@ -768,6 +788,7 @@ class WP_Plugin_Booking {
             $items_json = get_post_meta( $id, '_wpb_items', true );
             $items      = $items_json ? json_decode( $items_json, true ) : array();
             $stock_rem  = $this->get_remaining_items_stock( $id );
+
             if ( $items ) {
                 echo '<div class="mb-3">';
                 echo '<label class="form-label">' . esc_html__( 'Artículos', 'wp-plugin-booking' ) . '</label>';
@@ -786,6 +807,7 @@ class WP_Plugin_Booking {
                         if ( 'limited' === $item['type'] ) {
                             echo '<small class="text-muted me-2">' . sprintf( __( 'Quedan %d', 'wp-plugin-booking' ), $remaining ) . '</small>';
                         }
+
                         echo '<input type="number" class="form-control" style="width:80px;" min="0"' . $max_attr . ' name="items_qty[' . esc_attr( $idx ) . ']" value="0" />';
                     }
                     echo '</div>';
@@ -795,6 +817,7 @@ class WP_Plugin_Booking {
 
             echo '<button type="button" class="btn btn-secondary wpb-prev me-2">' . esc_html__( 'Atrás', 'wp-plugin-booking' ) . '</button>';
             echo '<button type="button" class="btn btn-danger wpb-next">' . esc_html__( 'Siguiente', 'wp-plugin-booking' ) . '</button>';
+
             echo '</div>';
 
             echo '<div class="wpb-step">';
@@ -813,6 +836,7 @@ class WP_Plugin_Booking {
             echo '</div>';
             echo '<button type="button" class="btn btn-secondary wpb-prev me-2">' . esc_html__( 'Atrás', 'wp-plugin-booking' ) . '</button>';
             echo '<button type="button" class="btn btn-danger wpb-next">' . esc_html__( 'Siguiente', 'wp-plugin-booking' ) . '</button>';
+
             echo '</div>';
 
             echo '<div class="wpb-step wpb-summary-step">';
@@ -827,6 +851,7 @@ class WP_Plugin_Booking {
             echo '<button type="button" class="btn btn-secondary wpb-prev me-2">' . esc_html__( 'Atrás', 'wp-plugin-booking' ) . '</button>';
             echo '<button type="submit" class="btn btn-danger wpb-confirm">' . esc_html__( 'Confirmar Reserva', 'wp-plugin-booking' ) . '</button>';
             echo '<div class="wpb-processing mt-3"><div class="spinner-border text-danger" role="status"><span class="visually-hidden">' . esc_html__( 'Procesando...', 'wp-plugin-booking' ) . '</span></div><span class="ms-2">' . esc_html__( 'Procesando, por favor espere...', 'wp-plugin-booking' ) . '</span></div>';
+
             echo '</div>';
 
             echo '<div class="wpb-step wpb-success">';
@@ -853,6 +878,7 @@ class WP_Plugin_Booking {
         echo '<div class="col-md-4"><div class="contact-item"><i class="fas fa-envelope"></i><span>' . esc_html( $email ) . '</span></div></div>';
         echo '<div class="col-md-4"><div class="contact-item"><i class="fas fa-globe"></i><span>' . esc_html( $url ) . '</span></div></div>';
         echo '</div></div>';
+
         echo '</div>';
         return ob_get_clean();
     }
@@ -1304,6 +1330,7 @@ class WP_Plugin_Booking {
         echo '<a href="?page=wpb-settings&tab=email" class="nav-tab' . ( 'email' === $tab ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Plantilla de Correo', 'wp-plugin-booking' ) . '</a>';
         echo '<a href="?page=wpb-settings&tab=frontpage" class="nav-tab' . ( 'frontpage' === $tab ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'FrontPage', 'wp-plugin-booking' ) . '</a>';
         echo '<a href="?page=wpb-settings&tab=modal" class="nav-tab' . ( 'modal' === $tab ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Diseño del Modal', 'wp-plugin-booking' ) . '</a>';
+
         echo '</h2>';
         echo '<form method="post" action="options.php">';
         if ( 'email' === $tab ) {
@@ -1315,10 +1342,12 @@ class WP_Plugin_Booking {
         } elseif ( 'modal' === $tab ) {
             settings_fields( 'wpb_modal_group' );
             do_settings_sections( 'wpb-modal' );
+
         } else {
             settings_fields( 'wpb_settings_group' );
             do_settings_sections( 'wpb-settings' );
         }
+
         submit_button();
         echo '</form></div>';
     }
@@ -1477,6 +1506,7 @@ class WP_Plugin_Booking {
             'manage_options',
             'edit-tags.php?taxonomy=wpb_service_category&post_type=wpb_service'
         );
+
     }
 
     /**
@@ -1578,6 +1608,7 @@ class WP_Plugin_Booking {
             'monthRevenue'  => array_values( $month_values ),
             'revenueLabel'  => __( 'Ingresos', 'wp-plugin-booking' ),
         ) );
+
     }
 
     /**
