@@ -20,7 +20,6 @@ jQuery(document).ready(function($){
             showStep(0);
         });
 
-
         form.on('click', '.wpb-next', function(e){
             e.preventDefault();
             var step = steps.eq(current);
@@ -66,7 +65,6 @@ jQuery(document).ready(function($){
                         }
                     });
                     form.find('.wpb-summary-items').html(itemsSummary);
-
                     form.find('.wpb-summary-service').text(form.closest('.modal').find('.wpb-modal-service-title').text());
                     form.find('.wpb-summary-date').text(form.closest('.modal').find('.wpb-modal-service-title').next('.mb-2').text().replace(/^[^:]*:\s*/, ''));
                     form.find('.wpb-summary-name').text(form.find('input[name="name"]').val());

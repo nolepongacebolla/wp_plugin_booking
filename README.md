@@ -32,4 +32,3 @@ El sistema envía un correo al cliente cuando crea una reserva y cada vez que se
 Dentro del menú **WPBookingStandar** hay una sección de **Estadísticas** que muestra el total de reservas y las ganancias acumuladas.
 
 Esa pantalla permite filtrar por rango de fechas y servicio y presenta gráficas de pastel con el número de reservas por estatus junto a una línea de ingresos mensuales utilizando Chart.js en un diseño más limpio.
-

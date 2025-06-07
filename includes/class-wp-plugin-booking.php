@@ -420,6 +420,58 @@ class WP_Plugin_Booking {
         return max( 0, $remaining );
     }
 
+    /**
+     * Get remaining stock for each item in a service.
+     *
+     * @param int $service_id Service ID.
+     * @return array Associative array of item index => remaining quantity.
+     */
+    public function get_remaining_items_stock( $service_id ) {
+        $items_meta = get_post_meta( $service_id, '_wpb_items', true );
+        $items      = $items_meta ? json_decode( $items_meta, true ) : array();
+        $remaining  = array();
+
+        foreach ( $items as $index => $item ) {
+            if ( 'limited' === $item['type'] ) {
+                $remaining[ $index ] = absint( $item['stock'] );
+            }
+        }
+
+        if ( ! $remaining ) {
+            return $remaining;
+        }
+
+        $bookings = get_posts( array(
+            'post_type'  => 'wpb_booking',
+            'numberposts'=> -1,
+            'meta_query' => array(
+                array(
+                    'key'   => '_wpb_service_id',
+                    'value' => $service_id,
+                ),
+            ),
+        ) );
+
+        foreach ( $bookings as $booking ) {
+            $data = get_post_meta( $booking->ID, '_wpb_items_data', true );
+            if ( $data && is_array( $data ) ) {
+                foreach ( $data as $idx => $qty ) {
+                    if ( isset( $remaining[ $idx ] ) ) {
+                        $remaining[ $idx ] -= absint( $qty );
+                    }
+                }
+            }
+        }
+
+        foreach ( $remaining as $idx => $qty ) {
+            if ( $qty < 0 ) {
+                $remaining[ $idx ] = 0;
+            }
+        }
+
+        return $remaining;
+    }
+
     public function handle_create_booking() {
         check_ajax_referer( 'wpb_booking_nonce', 'nonce' );
 
@@ -437,7 +489,7 @@ class WP_Plugin_Booking {
 
         $remaining = $this->get_remaining_capacity( $service_id );
         if ( $remaining < $persons ) {
-            wp_send_json_error( array( 'message' => __( 'No hay cupos suficientes', 'wp-plugin-booking' ) ) );
+            wp_send_json_error( array( 'message' => sprintf( __( 'Solo quedan %d cupos disponibles', 'wp-plugin-booking' ), $remaining ) ) );
         }
 
         $price    = floatval( get_post_meta( $service_id, '_wpb_price_per_person', true ) );
@@ -448,14 +500,23 @@ class WP_Plugin_Booking {
             $total = $total * ( 1 - $discount / 100 );
         }
 
-        $items_meta = get_post_meta( $service_id, '_wpb_items', true );
-        $items_def  = $items_meta ? json_decode( $items_meta, true ) : array();
-        $items_sel  = array();
+        $items_meta      = get_post_meta( $service_id, '_wpb_items', true );
+        $items_def       = $items_meta ? json_decode( $items_meta, true ) : array();
+        $items_remaining = $this->get_remaining_items_stock( $service_id );
+        $items_sel       = array();
+
         if ( isset( $_POST['items_qty'] ) && is_array( $_POST['items_qty'] ) ) {
             foreach ( $_POST['items_qty'] as $index => $qty ) {
                 $qty = absint( $qty );
                 if ( isset( $items_def[ $index ] ) && $qty > 0 ) {
                     $item = $items_def[ $index ];
+                    if ( 'limited' === $item['type'] ) {
+                        $avail = isset( $items_remaining[ $index ] ) ? $items_remaining[ $index ] : 0;
+                        if ( $qty > $avail ) {
+                            wp_send_json_error( array( 'message' => sprintf( __( 'Stock insuficiente para %s. Quedan %d.', 'wp-plugin-booking' ), $item['name'], $avail ) ) );
+                        }
+                    }
+
                     $items_sel[ $index ] = $qty;
                     if ( 'included' !== $item['type'] ) {
                         $total += $qty * floatval( $item['price'] );
@@ -716,6 +777,8 @@ class WP_Plugin_Booking {
 
             $items_json = get_post_meta( $id, '_wpb_items', true );
             $items      = $items_json ? json_decode( $items_json, true ) : array();
+            $stock_rem  = $this->get_remaining_items_stock( $id );
+
             if ( $items ) {
                 echo '<div class="mb-3">';
                 echo '<label class="form-label">' . esc_html__( 'Artículos', 'wp-plugin-booking' ) . '</label>';
@@ -729,7 +792,12 @@ class WP_Plugin_Booking {
                         echo '<span class="me-2">' . esc_html__( 'Incluido', 'wp-plugin-booking' ) . '</span>';
                         echo '<input type="hidden" name="items_qty[' . esc_attr( $idx ) . ']" value="' . $qty . '" />';
                     } else {
-                        $max_attr = 'unlimited' === $item['type'] ? '' : ' max="' . absint( $item['stock'] ) . '"';
+                        $remaining = isset( $stock_rem[ $idx ] ) ? $stock_rem[ $idx ] : ( 'unlimited' === $item['type'] ? '' : absint( $item['stock'] ) );
+                        $max_attr = 'unlimited' === $item['type'] ? '' : ' max="' . $remaining . '"';
+                        if ( 'limited' === $item['type'] ) {
+                            echo '<small class="text-muted me-2">' . sprintf( __( 'Quedan %d', 'wp-plugin-booking' ), $remaining ) . '</small>';
+                        }
+
                         echo '<input type="number" class="form-control" style="width:80px;" min="0"' . $max_attr . ' name="items_qty[' . esc_attr( $idx ) . ']" value="0" />';
                     }
                     echo '</div>';
@@ -1035,7 +1103,6 @@ class WP_Plugin_Booking {
         echo '<input type="url" name="wpb_contact_url" value="' . esc_attr( $value ) . '" class="regular-text" />';
     }
 
-
     /**
      * Output settings page markup.
      */
@@ -1261,7 +1328,6 @@ class WP_Plugin_Booking {
             $month  = date_i18n( 'Y-m', strtotime( $date ) );
             $total += $price;
 
-
             if ( ! isset( $status_totals[ $status ] ) ) {
                 $status_totals[ $status ] = 0;
             }
@@ -1303,7 +1369,6 @@ class WP_Plugin_Booking {
         echo '<canvas id="wpb-status-chart" width="300" height="300"></canvas>';
         echo '<canvas id="wpb-revenue-chart" width="500" height="300"></canvas>';
         echo '</div>';
-
 
         echo '<table class="widefat"><thead><tr><th>' . esc_html__( 'Estatus', 'wp-plugin-booking' ) . '</th><th>' . esc_html__( 'Cantidad', 'wp-plugin-booking' ) . '</th></tr></thead><tbody>';
         foreach ( $status_totals as $st => $count ) {
