@@ -36,6 +36,7 @@
   --wpb-checkbox-font-weight: normal;
 }
 
+
 .wpb-catalog-page {
   background: var(--wpb-light);
   color: var(--wpb-dark);
@@ -191,6 +192,7 @@
 }
 .wpb-modal-service-title { font-size:1.5rem; }
 .wpb-desc-header { color: var(--wpb-modal-title-color); font-weight:bold; }
+
 .wpb-terms summary { cursor:pointer; font-weight:bold; }
 .wpb-description {
   font-family: var(--wpb-modal-font-family);
@@ -219,6 +221,7 @@
 .checkbox-container { display:flex; align-items:center; cursor:pointer; font-size:14px; color:#333; font-style:var(--wpb-checkbox-font-style); font-weight:var(--wpb-checkbox-font-weight); }
 .checkbox-container input { display:none; }
 .checkmark { width:20px; height:20px; background:var(--wpb-checkbox-bg); border:2px solid #e0e0e0; border-radius:4px; margin-right:12px; position:relative; transition:all 0.3s ease; flex-shrink:0; }
+
 .checkbox-container input:checked + .checkmark { background:linear-gradient(45deg,#667eea,#764ba2); border-color:#667eea; }
 .checkbox-container input:checked + .checkmark::after { content:'\2713'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:white; font-size:12px; font-weight:bold; }
 .error-message { color:#e74c3c; font-size:14px; margin-top:5px; display:none; }
