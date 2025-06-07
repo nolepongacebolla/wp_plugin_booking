@@ -363,8 +363,10 @@ class WP_Plugin_Booking {
         echo '<div class="container my-5">';
         echo '<header class="hero-header py-5 text-center">';
         echo '<div class="hero-content">';
-        echo '<h1 class="hero-title mb-3">🌴 Paraíso Turístico</h1>';
-        echo '<p class="hero-subtitle mb-4">' . esc_html__( 'Experiencias inolvidables te esperan', 'wp-plugin-booking' ) . '</p>';
+        $hero_title    = get_option( 'wpb_front_title', '🌴 Paraíso Turístico' );
+        $hero_subtitle = get_option( 'wpb_front_subtitle', 'Experiencias inolvidables te esperan' );
+        echo '<h1 class="hero-title mb-3">' . esc_html( $hero_title ) . '</h1>';
+        echo '<p class="hero-subtitle mb-4">' . esc_html( $hero_subtitle ) . '</p>';
         echo '</div></header>';
         echo '<div class="d-flex justify-content-between align-items-center mb-4 wpb-catalog-search">';
         echo '<form class="row g-2" method="get">';
@@ -532,14 +534,18 @@ class WP_Plugin_Booking {
         }
         wp_reset_postdata();
         echo '</div>';
+        $premium_title = get_option( 'wpb_premium_title', '✨ Servicios Premium ✨' );
+        $premium_text  = get_option( 'wpb_premium_text', '¿Buscas algo completamente personalizado? Nuestro equipo diseña experiencias únicas para ti.' );
+        $phone  = get_option( 'wpb_contact_phone', '+1 (555) 123-4567' );
+        $email  = get_option( 'wpb_contact_email', 'info@paraisoturistico.com' );
+        $url    = get_option( 'wpb_contact_url', 'https://www.paraisoturistico.com' );
         echo '<div class="premium-banner p-5 text-center">';
-        echo '<h2 class="premium-title mb-3">✨ Servicios Premium ✨</h2>';
-
-        echo '<p class="premium-text mb-4">' . esc_html__( '¿Buscas algo completamente personalizado? Nuestro equipo dise\xf1a experiencias \xfanicas para ti.', 'wp-plugin-booking' ) . '</p>';
+        echo '<h2 class="premium-title mb-3">' . esc_html( $premium_title ) . '</h2>';
+        echo '<p class="premium-text mb-4">' . esc_html( $premium_text ) . '</p>';
         echo '<div class="row justify-content-center g-3">';
-        echo '<div class="col-md-4"><div class="contact-item"><i class="fas fa-phone"></i><span>+1 (555) 123-4567</span></div></div>';
-        echo '<div class="col-md-4"><div class="contact-item"><i class="fas fa-envelope"></i><span>info@paraisoturistico.com</span></div></div>';
-        echo '<div class="col-md-4"><div class="contact-item"><i class="fas fa-globe"></i><span>www.paraisoturistico.com</span></div></div>';
+        echo '<div class="col-md-4"><div class="contact-item"><i class="fas fa-phone"></i><span>' . esc_html( $phone ) . '</span></div></div>';
+        echo '<div class="col-md-4"><div class="contact-item"><i class="fas fa-envelope"></i><span>' . esc_html( $email ) . '</span></div></div>';
+        echo '<div class="col-md-4"><div class="contact-item"><i class="fas fa-globe"></i><span>' . esc_html( $url ) . '</span></div></div>';
         echo '</div></div>';
 
         echo '</div>';
@@ -609,8 +615,44 @@ class WP_Plugin_Booking {
             'default'           => '',
         ) );
 
+        register_setting( 'wpb_frontpage_group', 'wpb_front_title', array(
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => '🌴 Paraíso Turístico',
+        ) );
+
+        register_setting( 'wpb_frontpage_group', 'wpb_front_subtitle', array(
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'Experiencias inolvidables te esperan',
+        ) );
+
+        register_setting( 'wpb_frontpage_group', 'wpb_premium_title', array(
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => '✨ Servicios Premium ✨',
+        ) );
+
+        register_setting( 'wpb_frontpage_group', 'wpb_premium_text', array(
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => '¿Buscas algo completamente personalizado? Nuestro equipo diseña experiencias únicas para ti.',
+        ) );
+
+        register_setting( 'wpb_frontpage_group', 'wpb_contact_phone', array(
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => '+1 (555) 123-4567',
+        ) );
+
+        register_setting( 'wpb_frontpage_group', 'wpb_contact_email', array(
+            'sanitize_callback' => 'sanitize_email',
+            'default'           => 'info@paraisoturistico.com',
+        ) );
+
+        register_setting( 'wpb_frontpage_group', 'wpb_contact_url', array(
+            'sanitize_callback' => 'esc_url_raw',
+            'default'           => 'https://www.paraisoturistico.com',
+        ) );
+
         add_settings_section( 'wpb_main', __( 'Ajustes Generales', 'wp-plugin-booking' ), null, 'wpb-settings' );
         add_settings_section( 'wpb_email', __( 'Plantilla de Correo', 'wp-plugin-booking' ), null, 'wpb-email' );
+        add_settings_section( 'wpb_frontpage', __( 'Textos de Portada', 'wp-plugin-booking' ), null, 'wpb-frontpage' );
 
 
         add_settings_field(
@@ -628,6 +670,63 @@ class WP_Plugin_Booking {
             'wpb-email',
             'wpb_email'
         );
+
+        add_settings_field(
+            'wpb_front_title',
+            __( 'Título principal', 'wp-plugin-booking' ),
+            array( $this, 'front_title_field' ),
+            'wpb-frontpage',
+            'wpb_frontpage'
+        );
+
+        add_settings_field(
+            'wpb_front_subtitle',
+            __( 'Subtítulo', 'wp-plugin-booking' ),
+            array( $this, 'front_subtitle_field' ),
+            'wpb-frontpage',
+            'wpb_frontpage'
+        );
+
+        add_settings_field(
+            'wpb_premium_title',
+            __( 'Título sección premium', 'wp-plugin-booking' ),
+            array( $this, 'premium_title_field' ),
+            'wpb-frontpage',
+            'wpb_frontpage'
+        );
+
+        add_settings_field(
+            'wpb_premium_text',
+            __( 'Texto sección premium', 'wp-plugin-booking' ),
+            array( $this, 'premium_text_field' ),
+            'wpb-frontpage',
+            'wpb_frontpage'
+        );
+
+        add_settings_field(
+            'wpb_contact_phone',
+            __( 'Teléfono', 'wp-plugin-booking' ),
+            array( $this, 'contact_phone_field' ),
+            'wpb-frontpage',
+            'wpb_frontpage'
+        );
+
+        add_settings_field(
+            'wpb_contact_email',
+            __( 'Correo', 'wp-plugin-booking' ),
+            array( $this, 'contact_email_field' ),
+            'wpb-frontpage',
+            'wpb_frontpage'
+        );
+
+        add_settings_field(
+            'wpb_contact_url',
+            __( 'URL Web', 'wp-plugin-booking' ),
+            array( $this, 'contact_url_field' ),
+            'wpb-frontpage',
+            'wpb_frontpage'
+        );
+
     }
 
     /**
@@ -648,6 +747,42 @@ class WP_Plugin_Booking {
         return wp_kses_post( $html );
     }
 
+    public function front_title_field() {
+        $value = get_option( 'wpb_front_title', '🌴 Paraíso Turístico' );
+        echo '<input type="text" name="wpb_front_title" value="' . esc_attr( $value ) . '" class="regular-text" />';
+    }
+
+    public function front_subtitle_field() {
+        $value = get_option( 'wpb_front_subtitle', 'Experiencias inolvidables te esperan' );
+        echo '<input type="text" name="wpb_front_subtitle" value="' . esc_attr( $value ) . '" class="regular-text" />';
+    }
+
+    public function premium_title_field() {
+        $value = get_option( 'wpb_premium_title', '✨ Servicios Premium ✨' );
+        echo '<input type="text" name="wpb_premium_title" value="' . esc_attr( $value ) . '" class="regular-text" />';
+    }
+
+    public function premium_text_field() {
+        $value = get_option( 'wpb_premium_text', '¿Buscas algo completamente personalizado? Nuestro equipo diseña experiencias únicas para ti.' );
+        echo '<textarea name="wpb_premium_text" rows="3" class="large-text">' . esc_textarea( $value ) . '</textarea>';
+    }
+
+    public function contact_phone_field() {
+        $value = get_option( 'wpb_contact_phone', '+1 (555) 123-4567' );
+        echo '<input type="text" name="wpb_contact_phone" value="' . esc_attr( $value ) . '" class="regular-text" />';
+    }
+
+    public function contact_email_field() {
+        $value = get_option( 'wpb_contact_email', 'info@paraisoturistico.com' );
+        echo '<input type="email" name="wpb_contact_email" value="' . esc_attr( $value ) . '" class="regular-text" />';
+    }
+
+    public function contact_url_field() {
+        $value = get_option( 'wpb_contact_url', 'https://www.paraisoturistico.com' );
+        echo '<input type="url" name="wpb_contact_url" value="' . esc_attr( $value ) . '" class="regular-text" />';
+    }
+
+
     /**
      * Output settings page markup.
      */
@@ -658,11 +793,17 @@ class WP_Plugin_Booking {
         echo '<h2 class="nav-tab-wrapper">';
         echo '<a href="?page=wpb-settings&tab=general" class="nav-tab' . ( 'general' === $tab ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Generales', 'wp-plugin-booking' ) . '</a>';
         echo '<a href="?page=wpb-settings&tab=email" class="nav-tab' . ( 'email' === $tab ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Plantilla de Correo', 'wp-plugin-booking' ) . '</a>';
+        echo '<a href="?page=wpb-settings&tab=frontpage" class="nav-tab' . ( 'frontpage' === $tab ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'FrontPage', 'wp-plugin-booking' ) . '</a>';
+
         echo '</h2>';
         echo '<form method="post" action="options.php">';
         if ( 'email' === $tab ) {
             settings_fields( 'wpb_email_group' );
             do_settings_sections( 'wpb-email' );
+        } elseif ( 'frontpage' === $tab ) {
+            settings_fields( 'wpb_frontpage_group' );
+            do_settings_sections( 'wpb-frontpage' );
+
         } else {
             settings_fields( 'wpb_settings_group' );
             do_settings_sections( 'wpb-settings' );
