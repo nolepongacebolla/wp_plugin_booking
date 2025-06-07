@@ -348,10 +348,6 @@ class WP_Plugin_Booking {
     }
 
 
-  
-  
-  
-  
     public function save_service_meta( $post_id ) {
         if ( isset( $_POST['wpb_price_per_person'] ) ) {
             update_post_meta( $post_id, '_wpb_price_per_person', floatval( $_POST['wpb_price_per_person'] ) );
@@ -594,6 +590,11 @@ class WP_Plugin_Booking {
 
     public function booking_catalog_shortcode() {
         wp_enqueue_style( 'wpb-catalog', WP_PLUGIN_BOOKING_URL . 'assets/css/catalog.css', array(), WP_PLUGIN_BOOKING_VERSION );
+        $custom_css = $this->generate_modal_css();
+        if ( $custom_css ) {
+            wp_add_inline_style( 'wpb-catalog', $custom_css );
+        }
+
         wp_enqueue_script( 'wpb-catalog', WP_PLUGIN_BOOKING_URL . 'assets/js/catalog.js', array( 'jquery' ), WP_PLUGIN_BOOKING_VERSION, true );
         wp_localize_script( 'wpb-catalog', 'wpbCatalog', array(
             'ajax_url' => admin_url( 'admin-ajax.php' ),
@@ -728,8 +729,9 @@ class WP_Plugin_Booking {
             }
             echo '<div class="wpb-description mb-3">' . apply_filters( 'the_content', get_the_content() ) . '</div>';
             if ( $includes ) {
+                $inc_header = get_option( 'wpb_include_header', 'Incluye' );
                 echo '<div class="mb-3 wpb-includes">';
-                echo '<h5 class="fw-bold mb-2">' . esc_html__( 'Incluye:', 'wp-plugin-booking' ) . '</h5>';
+                echo '<h5 class="fw-bold mb-2">' . esc_html( $inc_header ) . '</h5>';
                 echo wpautop( wp_kses_post( $includes ) );
                 echo '</div>';
 
@@ -740,7 +742,9 @@ class WP_Plugin_Booking {
                 $cid = 'wpb_accept_' . $id;
                 echo '<label class="checkbox-container">';
                 echo '<input type="checkbox" id="' . esc_attr( $cid ) . '" required />';
-                echo '<span class="checkmark"></span>' . esc_html__( 'He leído y acepto los términos y condiciones', 'wp-plugin-booking' );
+                $chk_txt = get_option( 'wpb_checkbox_text', __( 'He leído y acepto los términos y condiciones', 'wp-plugin-booking' ) );
+                echo '<span class="checkmark"></span>' . esc_html( $chk_txt );
+
                 echo '</label>';
                 echo '<div class="error-message wpb-terms-error">' . esc_html__( 'Debes aceptar los términos y condiciones', 'wp-plugin-booking' ) . '</div>';
                 echo '</div>';
@@ -978,9 +982,113 @@ class WP_Plugin_Booking {
             'default'           => 'https://www.paraisoturistico.com',
         ) );
 
+        /* Modal design settings */
+        register_setting( 'wpb_modal_group', 'wpb_modal_font', array(
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'Poppins',
+        ) );
+        register_setting( 'wpb_modal_group', 'wpb_modal_font_size', array(
+            'sanitize_callback' => 'absint',
+            'default'           => 16,
+        ) );
+        register_setting( 'wpb_modal_group', 'wpb_modal_text_color', array(
+            'sanitize_callback' => 'sanitize_hex_color',
+            'default'           => '#444444',
+        ) );
+        register_setting( 'wpb_modal_group', 'wpb_modal_title_color', array(
+            'sanitize_callback' => 'sanitize_hex_color',
+            'default'           => '#000000',
+        ) );
+        register_setting( 'wpb_modal_group', 'wpb_modal_bg_color', array(
+            'sanitize_callback' => 'sanitize_hex_color',
+            'default'           => '#ffffff',
+        ) );
+        register_setting( 'wpb_modal_group', 'wpb_modal_border_color', array(
+            'sanitize_callback' => 'sanitize_hex_color',
+            'default'           => '#dc3545',
+        ) );
+        register_setting( 'wpb_modal_group', 'wpb_modal_next_color', array(
+            'sanitize_callback' => 'sanitize_hex_color',
+            'default'           => '#dc3545',
+        ) );
+        register_setting( 'wpb_modal_group', 'wpb_modal_close_color', array(
+            'sanitize_callback' => 'sanitize_hex_color',
+            'default'           => '#000000',
+        ) );
+
+        register_setting( 'wpb_modal_group', 'wpb_include_show', array(
+            'sanitize_callback' => 'absint',
+            'default'           => 1,
+        ) );
+        register_setting( 'wpb_modal_group', 'wpb_include_header', array(
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'Incluye',
+        ) );
+        register_setting( 'wpb_modal_group', 'wpb_include_bg_color', array(
+            'sanitize_callback' => 'sanitize_hex_color',
+            'default'           => '#f9f9f9',
+        ) );
+        register_setting( 'wpb_modal_group', 'wpb_include_text_color', array(
+            'sanitize_callback' => 'sanitize_hex_color',
+            'default'           => '#444444',
+        ) );
+        register_setting( 'wpb_modal_group', 'wpb_include_padding', array(
+            'sanitize_callback' => 'absint',
+            'default'           => 15,
+        ) );
+
+        register_setting( 'wpb_modal_group', 'wpb_desc_bg_color', array(
+            'sanitize_callback' => 'sanitize_hex_color',
+            'default'           => '#f9f9f9',
+        ) );
+        register_setting( 'wpb_modal_group', 'wpb_desc_text_color', array(
+            'sanitize_callback' => 'sanitize_hex_color',
+            'default'           => '#444444',
+        ) );
+        register_setting( 'wpb_modal_group', 'wpb_desc_align', array(
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'left',
+        ) );
+        register_setting( 'wpb_modal_group', 'wpb_desc_line_height', array(
+            'sanitize_callback' => 'floatval',
+            'default'           => 1.6,
+        ) );
+
+        register_setting( 'wpb_modal_group', 'wpb_img_size', array(
+            'sanitize_callback' => 'absint',
+            'default'           => 150,
+        ) );
+        register_setting( 'wpb_modal_group', 'wpb_img_spacing', array(
+            'sanitize_callback' => 'absint',
+            'default'           => 5,
+        ) );
+        register_setting( 'wpb_modal_group', 'wpb_img_radius', array(
+            'sanitize_callback' => 'absint',
+            'default'           => 8,
+        ) );
+
+        register_setting( 'wpb_modal_group', 'wpb_checkbox_text', array(
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'He leído y acepto los términos y condiciones',
+        ) );
+        register_setting( 'wpb_modal_group', 'wpb_checkbox_bg', array(
+            'sanitize_callback' => 'sanitize_hex_color',
+            'default'           => '#ffffff',
+        ) );
+        register_setting( 'wpb_modal_group', 'wpb_checkbox_style', array(
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'normal',
+        ) );
+
+        register_setting( 'wpb_modal_group', 'wpb_modal_custom_css', array(
+            'sanitize_callback' => 'wp_kses_post',
+            'default'           => '',
+        ) );
+
         add_settings_section( 'wpb_main', __( 'Ajustes Generales', 'wp-plugin-booking' ), null, 'wpb-settings' );
         add_settings_section( 'wpb_email', __( 'Plantilla de Correo', 'wp-plugin-booking' ), null, 'wpb-email' );
         add_settings_section( 'wpb_frontpage', __( 'Textos de Portada', 'wp-plugin-booking' ), null, 'wpb-frontpage' );
+        add_settings_section( 'wpb_modal', __( 'Diseño del Modal de Reserva', 'wp-plugin-booking' ), null, 'wpb-modal' );
 
 
         add_settings_field(
@@ -1054,6 +1162,37 @@ class WP_Plugin_Booking {
             'wpb-frontpage',
             'wpb_frontpage'
         );
+
+        /* Modal tab fields */
+        add_settings_field( 'wpb_modal_font', __( 'Fuente', 'wp-plugin-booking' ), array( $this, 'modal_font_field' ), 'wpb-modal', 'wpb_modal' );
+        add_settings_field( 'wpb_modal_font_size', __( 'Tamaño de fuente', 'wp-plugin-booking' ), array( $this, 'modal_font_size_field' ), 'wpb-modal', 'wpb_modal' );
+        add_settings_field( 'wpb_modal_text_color', __( 'Color de texto', 'wp-plugin-booking' ), array( $this, 'modal_color_field' ), 'wpb-modal', 'wpb_modal', array( 'label_for' => 'wpb_modal_text_color', 'option' => 'wpb_modal_text_color' ) );
+        add_settings_field( 'wpb_modal_title_color', __( 'Color del título', 'wp-plugin-booking' ), array( $this, 'modal_color_field' ), 'wpb-modal', 'wpb_modal', array( 'label_for' => 'wpb_modal_title_color', 'option' => 'wpb_modal_title_color' ) );
+        add_settings_field( 'wpb_modal_bg_color', __( 'Fondo del modal', 'wp-plugin-booking' ), array( $this, 'modal_color_field' ), 'wpb-modal', 'wpb_modal', array( 'label_for' => 'wpb_modal_bg_color', 'option' => 'wpb_modal_bg_color' ) );
+        add_settings_field( 'wpb_modal_border_color', __( 'Borde del modal', 'wp-plugin-booking' ), array( $this, 'modal_color_field' ), 'wpb-modal', 'wpb_modal', array( 'label_for' => 'wpb_modal_border_color', 'option' => 'wpb_modal_border_color' ) );
+        add_settings_field( 'wpb_modal_next_color', __( 'Color botón Siguiente', 'wp-plugin-booking' ), array( $this, 'modal_color_field' ), 'wpb-modal', 'wpb_modal', array( 'label_for' => 'wpb_modal_next_color', 'option' => 'wpb_modal_next_color' ) );
+        add_settings_field( 'wpb_modal_close_color', __( 'Color botón cerrar', 'wp-plugin-booking' ), array( $this, 'modal_color_field' ), 'wpb-modal', 'wpb_modal', array( 'label_for' => 'wpb_modal_close_color', 'option' => 'wpb_modal_close_color' ) );
+
+        add_settings_field( 'wpb_include_show', __( 'Mostrar recuadro Incluye', 'wp-plugin-booking' ), array( $this, 'modal_checkbox_field' ), 'wpb-modal', 'wpb_modal' );
+        add_settings_field( 'wpb_include_header', __( 'Título del recuadro', 'wp-plugin-booking' ), array( $this, 'modal_include_header_field' ), 'wpb-modal', 'wpb_modal' );
+        add_settings_field( 'wpb_include_bg_color', __( 'Fondo recuadro', 'wp-plugin-booking' ), array( $this, 'modal_color_field' ), 'wpb-modal', 'wpb_modal', array( 'label_for' => 'wpb_include_bg_color', 'option' => 'wpb_include_bg_color' ) );
+        add_settings_field( 'wpb_include_text_color', __( 'Color de texto recuadro', 'wp-plugin-booking' ), array( $this, 'modal_color_field' ), 'wpb-modal', 'wpb_modal', array( 'label_for' => 'wpb_include_text_color', 'option' => 'wpb_include_text_color' ) );
+        add_settings_field( 'wpb_include_padding', __( 'Padding recuadro', 'wp-plugin-booking' ), array( $this, 'modal_padding_field' ), 'wpb-modal', 'wpb_modal' );
+
+        add_settings_field( 'wpb_desc_bg_color', __( 'Fondo descripción', 'wp-plugin-booking' ), array( $this, 'modal_color_field' ), 'wpb-modal', 'wpb_modal', array( 'label_for' => 'wpb_desc_bg_color', 'option' => 'wpb_desc_bg_color' ) );
+        add_settings_field( 'wpb_desc_text_color', __( 'Color texto descripción', 'wp-plugin-booking' ), array( $this, 'modal_color_field' ), 'wpb-modal', 'wpb_modal', array( 'label_for' => 'wpb_desc_text_color', 'option' => 'wpb_desc_text_color' ) );
+        add_settings_field( 'wpb_desc_align', __( 'Alineación del texto', 'wp-plugin-booking' ), array( $this, 'modal_align_field' ), 'wpb-modal', 'wpb_modal' );
+        add_settings_field( 'wpb_desc_line_height', __( 'Espaciado entre líneas', 'wp-plugin-booking' ), array( $this, 'modal_line_height_field' ), 'wpb-modal', 'wpb_modal' );
+
+        add_settings_field( 'wpb_img_size', __( 'Tamaño de imágenes', 'wp-plugin-booking' ), array( $this, 'modal_img_size_field' ), 'wpb-modal', 'wpb_modal' );
+        add_settings_field( 'wpb_img_spacing', __( 'Espaciado entre imágenes', 'wp-plugin-booking' ), array( $this, 'modal_img_spacing_field' ), 'wpb-modal', 'wpb_modal' );
+        add_settings_field( 'wpb_img_radius', __( 'Bordes redondeados', 'wp-plugin-booking' ), array( $this, 'modal_img_radius_field' ), 'wpb-modal', 'wpb_modal' );
+
+        add_settings_field( 'wpb_checkbox_text', __( 'Texto del checkbox', 'wp-plugin-booking' ), array( $this, 'modal_checkbox_text_field' ), 'wpb-modal', 'wpb_modal' );
+        add_settings_field( 'wpb_checkbox_bg', __( 'Color fondo checkbox', 'wp-plugin-booking' ), array( $this, 'modal_color_field' ), 'wpb-modal', 'wpb_modal', array( 'label_for' => 'wpb_checkbox_bg', 'option' => 'wpb_checkbox_bg' ) );
+        add_settings_field( 'wpb_checkbox_style', __( 'Estilo del texto', 'wp-plugin-booking' ), array( $this, 'modal_style_field' ), 'wpb-modal', 'wpb_modal' );
+
+        add_settings_field( 'wpb_modal_custom_css', __( 'CSS adicional', 'wp-plugin-booking' ), array( $this, 'modal_custom_css_field' ), 'wpb-modal', 'wpb_modal' );
     }
 
     /**
@@ -1109,6 +1248,79 @@ class WP_Plugin_Booking {
         echo '<input type="url" name="wpb_contact_url" value="' . esc_attr( $value ) . '" class="regular-text" />';
     }
 
+    /* Modal design fields */
+    public function modal_font_field() {
+        $value = get_option( 'wpb_modal_font', 'Poppins' );
+        echo '<select name="wpb_modal_font"><option value="Poppins"' . selected( $value, 'Poppins', false ) . '>Poppins</option><option value="Roboto"' . selected( $value, 'Roboto', false ) . '>Roboto</option><option value="Arial"' . selected( $value, 'Arial', false ) . '>Arial</option></select>';
+    }
+
+    public function modal_font_size_field() {
+        $value = absint( get_option( 'wpb_modal_font_size', 16 ) );
+        echo '<input type="number" name="wpb_modal_font_size" value="' . esc_attr( $value ) . '" class="small-text" /> px';
+    }
+
+    public function modal_color_field( $args ) {
+        $option = isset( $args['option'] ) ? $args['option'] : '';
+        $value  = get_option( $option, '' );
+        echo '<input type="text" class="wp-color-picker-field" data-default-color="' . esc_attr( $value ) . '" name="' . esc_attr( $option ) . '" value="' . esc_attr( $value ) . '" />';
+    }
+
+    public function modal_checkbox_field() {
+        $value = get_option( 'wpb_include_show', 1 );
+        echo '<label><input type="checkbox" name="wpb_include_show" value="1"' . checked( $value, 1, false ) . ' /> ' . esc_html__( 'Mostrar recuadro', 'wp-plugin-booking' ) . '</label>';
+    }
+
+    public function modal_include_header_field() {
+        $value = get_option( 'wpb_include_header', 'Incluye' );
+        echo '<input type="text" name="wpb_include_header" value="' . esc_attr( $value ) . '" class="regular-text" />';
+    }
+
+    public function modal_padding_field() {
+        $value = absint( get_option( 'wpb_include_padding', 15 ) );
+        echo '<input type="number" name="wpb_include_padding" value="' . esc_attr( $value ) . '" class="small-text" /> px';
+    }
+
+    public function modal_align_field() {
+        $value = get_option( 'wpb_desc_align', 'left' );
+        echo '<select name="wpb_desc_align"><option value="left"' . selected( $value, 'left', false ) . '>' . esc_html__( 'Izquierda', 'wp-plugin-booking' ) . '</option><option value="center"' . selected( $value, 'center', false ) . '>' . esc_html__( 'Centrado', 'wp-plugin-booking' ) . '</option><option value="justify"' . selected( $value, 'justify', false ) . '>' . esc_html__( 'Justificado', 'wp-plugin-booking' ) . '</option></select>';
+    }
+
+    public function modal_line_height_field() {
+        $value = get_option( 'wpb_desc_line_height', 1.6 );
+        echo '<input type="number" step="0.1" name="wpb_desc_line_height" value="' . esc_attr( $value ) . '" class="small-text" />';
+    }
+
+    public function modal_img_size_field() {
+        $value = absint( get_option( 'wpb_img_size', 150 ) );
+        echo '<input type="number" name="wpb_img_size" value="' . esc_attr( $value ) . '" class="small-text" /> px';
+    }
+
+    public function modal_img_spacing_field() {
+        $value = absint( get_option( 'wpb_img_spacing', 5 ) );
+        echo '<input type="number" name="wpb_img_spacing" value="' . esc_attr( $value ) . '" class="small-text" /> px';
+    }
+
+    public function modal_img_radius_field() {
+        $value = absint( get_option( 'wpb_img_radius', 8 ) );
+        echo '<input type="number" name="wpb_img_radius" value="' . esc_attr( $value ) . '" class="small-text" /> px';
+    }
+
+    public function modal_checkbox_text_field() {
+        $value = get_option( 'wpb_checkbox_text', 'He leído y acepto los términos y condiciones' );
+        echo '<input type="text" name="wpb_checkbox_text" value="' . esc_attr( $value ) . '" class="regular-text" />';
+    }
+
+    public function modal_style_field() {
+        $value = get_option( 'wpb_checkbox_style', 'normal' );
+        echo '<select name="wpb_checkbox_style"><option value="normal"' . selected( $value, 'normal', false ) . '>' . esc_html__( 'Normal', 'wp-plugin-booking' ) . '</option><option value="italic"' . selected( $value, 'italic', false ) . '>Italic</option><option value="bold"' . selected( $value, 'bold', false ) . '>Bold</option></select>';
+    }
+
+    public function modal_custom_css_field() {
+        $value = get_option( 'wpb_modal_custom_css', '' );
+        echo '<textarea name="wpb_modal_custom_css" rows="5" class="large-text code">' . esc_textarea( $value ) . '</textarea>';
+    }
+
+
     /**
      * Output settings page markup.
      */
@@ -1120,6 +1332,7 @@ class WP_Plugin_Booking {
         echo '<a href="?page=wpb-settings&tab=general" class="nav-tab' . ( 'general' === $tab ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Generales', 'wp-plugin-booking' ) . '</a>';
         echo '<a href="?page=wpb-settings&tab=email" class="nav-tab' . ( 'email' === $tab ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Plantilla de Correo', 'wp-plugin-booking' ) . '</a>';
         echo '<a href="?page=wpb-settings&tab=frontpage" class="nav-tab' . ( 'frontpage' === $tab ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'FrontPage', 'wp-plugin-booking' ) . '</a>';
+        echo '<a href="?page=wpb-settings&tab=modal" class="nav-tab' . ( 'modal' === $tab ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Diseño del Modal', 'wp-plugin-booking' ) . '</a>';
 
         echo '</h2>';
         echo '<form method="post" action="options.php">';
@@ -1129,6 +1342,9 @@ class WP_Plugin_Booking {
         } elseif ( 'frontpage' === $tab ) {
             settings_fields( 'wpb_frontpage_group' );
             do_settings_sections( 'wpb-frontpage' );
+        } elseif ( 'modal' === $tab ) {
+            settings_fields( 'wpb_modal_group' );
+            do_settings_sections( 'wpb-modal' );
 
         } else {
             settings_fields( 'wpb_settings_group' );
@@ -1434,8 +1650,77 @@ class WP_Plugin_Booking {
                 WP_PLUGIN_BOOKING_VERSION,
                 true
             );
-
         }
+
+        if ( $screen && 'wpbookingstandar_page_wpb-settings' === $screen->id ) {
+            wp_enqueue_style( 'wp-color-picker' );
+            wp_enqueue_script( 'wp-color-picker' );
+            wp_add_inline_script( 'wp-color-picker', 'jQuery(function($){$(".wp-color-picker-field").wpColorPicker();});' );
+        }
+    }
+
+    /**
+     * Generate inline CSS for modal customization based on settings.
+     *
+     * @return string CSS rules.
+     */
+    private function generate_modal_css() {
+        $font     = get_option( 'wpb_modal_font', 'Poppins' );
+        $size     = absint( get_option( 'wpb_modal_font_size', 16 ) );
+        $txt      = sanitize_hex_color( get_option( 'wpb_modal_text_color', '#444444' ) );
+        $title    = sanitize_hex_color( get_option( 'wpb_modal_title_color', '#000000' ) );
+        $bg       = sanitize_hex_color( get_option( 'wpb_modal_bg_color', '#ffffff' ) );
+        $border   = sanitize_hex_color( get_option( 'wpb_modal_border_color', '#dc3545' ) );
+        $next     = sanitize_hex_color( get_option( 'wpb_modal_next_color', '#dc3545' ) );
+        $close    = sanitize_hex_color( get_option( 'wpb_modal_close_color', '#000000' ) );
+
+        $inc_bg   = sanitize_hex_color( get_option( 'wpb_include_bg_color', '#f9f9f9' ) );
+        $inc_txt  = sanitize_hex_color( get_option( 'wpb_include_text_color', '#444444' ) );
+        $inc_pad  = absint( get_option( 'wpb_include_padding', 15 ) );
+        $inc_disp = get_option( 'wpb_include_show', 1 ) ? 'block' : 'none';
+
+        $desc_bg  = sanitize_hex_color( get_option( 'wpb_desc_bg_color', '#f9f9f9' ) );
+        $desc_txt = sanitize_hex_color( get_option( 'wpb_desc_text_color', '#444444' ) );
+        $desc_al  = sanitize_text_field( get_option( 'wpb_desc_align', 'left' ) );
+        $desc_lh  = floatval( get_option( 'wpb_desc_line_height', 1.6 ) );
+
+        $img_size = absint( get_option( 'wpb_img_size', 150 ) );
+        $img_sp   = absint( get_option( 'wpb_img_spacing', 5 ) );
+        $img_rad  = absint( get_option( 'wpb_img_radius', 8 ) );
+
+        $chk_bg   = sanitize_hex_color( get_option( 'wpb_checkbox_bg', '#ffffff' ) );
+        $chk_style= sanitize_text_field( get_option( 'wpb_checkbox_style', 'normal' ) );
+        $chk_weight = 'bold' === $chk_style ? 'bold' : 'normal';
+        $chk_style_css = 'italic' === $chk_style ? 'italic' : 'normal';
+
+        $extra_css = get_option( 'wpb_modal_custom_css', '' );
+
+        $css  = ":root{";
+        $css .= "--wpb-modal-font-family:'" . esc_attr( $font ) . "',sans-serif;";
+        $css .= "--wpb-modal-font-size:" . $size . "px;";
+        $css .= "--wpb-modal-text-color:$txt;";
+        $css .= "--wpb-modal-title-color:$title;";
+        $css .= "--wpb-modal-bg:$bg;";
+        $css .= "--wpb-modal-border:$border;";
+        $css .= "--wpb-modal-next-bg:$next;";
+        $css .= "--wpb-modal-close-color:$close;";
+        $css .= "--wpb-include-display:$inc_disp;";
+        $css .= "--wpb-include-bg:$inc_bg;";
+        $css .= "--wpb-include-text-color:$inc_txt;";
+        $css .= "--wpb-include-padding:" . $inc_pad . "px;";
+        $css .= "--wpb-desc-bg:$desc_bg;";
+        $css .= "--wpb-desc-text-color:$desc_txt;";
+        $css .= "--wpb-desc-align:$desc_al;";
+        $css .= "--wpb-desc-line-height:$desc_lh;";
+        $css .= "--wpb-img-size:" . $img_size . "px;";
+        $css .= "--wpb-img-spacing:" . $img_sp . "px;";
+        $css .= "--wpb-img-radius:" . $img_rad . "px;";
+        $css .= "--wpb-checkbox-bg:$chk_bg;";
+        $css .= "--wpb-checkbox-font-style:$chk_style_css;";
+        $css .= "--wpb-checkbox-font-weight:$chk_weight;";
+        $css .= "}";
+        $css .= "\n" . wp_kses_post( $extra_css );
+        return $css;
     }
 
     /**
