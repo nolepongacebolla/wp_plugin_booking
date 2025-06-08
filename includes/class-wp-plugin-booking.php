@@ -345,7 +345,6 @@ class WP_Plugin_Booking {
         echo '</tr>';
     }
 
-
     public function save_service_meta( $post_id ) {
         if ( isset( $_POST['wpb_price_per_person'] ) ) {
             update_post_meta( $post_id, '_wpb_price_per_person', floatval( $_POST['wpb_price_per_person'] ) );
@@ -629,9 +628,8 @@ class WP_Plugin_Booking {
         echo '<p class="hero-subtitle">' . esc_html( $hero_subtitle ) . '</p>';
         echo '</section>';
         echo '<section class="catalog" id="tours">';
-        echo '<h2>' . esc_html__( 'Nuestros Tours Destacados', 'wp-plugin-booking' ) . '</h2>';
-        echo '<div class="d-flex justify-content-between align-items-center mb-4 wpb-catalog-search">';
-        echo '<form class="row g-2" method="get">';
+        echo '<div class="wpb-catalog-search text-center mb-4">';
+        echo '<form class="row row-cols-sm-auto g-2 justify-content-center" method="get">';
 
         $terms = get_terms( array( 'taxonomy' => 'wpb_service_category', 'hide_empty' => false ) );
         echo '<div class="col">';
@@ -646,8 +644,8 @@ class WP_Plugin_Booking {
         echo '<button type="submit" class="btn btn-danger">' . esc_html__( 'Filtrar', 'wp-plugin-booking' ) . '</button>';
         echo '</div>';
         echo '</form>';
-        echo '<div class="text-end mt-3"><a href="' . esc_url( home_url() ) . '" class="btn btn-outline-dark">' . esc_html__( 'Inicio', 'wp-plugin-booking' ) . '</a></div>';
         echo '</div>';
+        
 
         echo '<div class="row wpb-catalog">';
         while ( $query->have_posts() ) {
