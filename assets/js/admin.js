@@ -39,4 +39,58 @@ jQuery(function($){
         e.preventDefault();
         $(this).closest('tr').remove();
     });
+
+    // Single image selector for catalog background
+    var imgFrame;
+    $('body').on('click', '.wpb-select-image', function(e){
+        e.preventDefault();
+        var target = $('#'+$(this).data('target'));
+        if(imgFrame){ imgFrame.open(); return; }
+        imgFrame = wp.media({
+            title: wpbGallery.select,
+            button: { text: wpbGallery.use },
+            library: { type: 'image' },
+            multiple: false
+        });
+        imgFrame.on('select', function(){
+            var attachment = imgFrame.state().get('selection').first().toJSON();
+            target.val(attachment.url).trigger('change');
+        });
+        imgFrame.open();
+    });
+
+    function updateCatalogPreview(){
+        var preview = $('#wpb-catalog-preview');
+        if(!preview.length) return;
+        preview.find('.preview-title').text($('#wpb_cat_title_text').val());
+        preview.find('.preview-subtitle').text($('#wpb_cat_subtitle_text').val());
+        preview.find('.preview-btn').text($('#wpb_cat_btn_text').val());
+        preview.find('.preview-title').css({
+            'font-family': $('#wpb_cat_title_font').val(),
+            'font-size': $('#wpb_cat_title_size').val()+'px',
+            'color': $('#wpb_cat_title_color').val()
+        });
+        preview.find('.preview-subtitle').css({
+            'font-size': $('#wpb_cat_subtitle_size').val()+'px',
+            'color': $('#wpb_cat_subtitle_color').val(),
+            'text-align': $('#wpb_cat_subtitle_align').val()
+        });
+        preview.find('.preview-btn').css({
+            'background-color': $('#wpb_cat_btn_color').val(),
+            'border-color': $('#wpb_cat_btn_color').val(),
+            'border-radius': $('#wpb_cat_btn_radius').val()+'px'
+        });
+        var type = $('#wpb_cat_bg_type').val();
+        if(type === 'color'){
+            preview.css('background', $('#wpb_cat_bg_color').val());
+        } else if(type === 'image'){
+            var url = $('#wpb_cat_bg_image').val();
+            preview.css({ 'background':'url('+url+') center/cover no-repeat' });
+        } else {
+            preview.css('background','#fff');
+        }
+    }
+
+    $('body').on('input change', 'input[id^="wpb_cat_"], select[id^="wpb_cat_"]', updateCatalogPreview);
+    updateCatalogPreview();
 });

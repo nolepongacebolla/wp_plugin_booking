@@ -557,10 +557,12 @@ class WP_Plugin_Booking {
     /**
      * Send an email to the customer when the booking status changes.
      *
-     * @param int    $booking_id Booking post ID.
-     * @param string $status     New status.
-     */
-    public function send_status_email( $booking_id, $status ) {
+        $custom_css  = $this->generate_modal_css();
+        $custom_css .= "\n" . $this->generate_catalog_css();
+        $hero_title    = get_option( 'wpb_cat_title_text', get_option( 'wpb_front_title', 'Descubre el Mundo' ) );
+        $hero_subtitle = get_option( 'wpb_cat_subtitle_text', get_option( 'wpb_front_subtitle', 'Experiencias inolvidables te esperan' ) );
+        $btn_text = get_option( 'wpb_cat_btn_text', __( 'Filtrar', 'wp-plugin-booking' ) );
+        echo '<button type="submit" class="btn btn-danger">' . esc_html( $btn_text ) . '</button>';
         $email   = get_post_meta( $booking_id, '_wpb_customer_email', true );
         if ( ! $email ) {
             return;
@@ -936,6 +938,64 @@ class WP_Plugin_Booking {
         }
     }
 
+        /* Catalog page design settings */
+        register_setting( 'wpb_catalog_group', 'wpb_cat_title_text', array(
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => '🌴 Paraíso Turístico',
+        ) );
+        register_setting( 'wpb_catalog_group', 'wpb_cat_title_font', array(
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'Poppins',
+        ) );
+        register_setting( 'wpb_catalog_group', 'wpb_cat_title_size', array(
+            'sanitize_callback' => 'absint',
+            'default'           => 48,
+        ) );
+        register_setting( 'wpb_catalog_group', 'wpb_cat_title_color', array(
+            'sanitize_callback' => 'sanitize_hex_color',
+            'default'           => '#000000',
+        ) );
+        register_setting( 'wpb_catalog_group', 'wpb_cat_subtitle_text', array(
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'Experiencias inolvidables te esperan',
+        ) );
+        register_setting( 'wpb_catalog_group', 'wpb_cat_subtitle_size', array(
+            'sanitize_callback' => 'absint',
+            'default'           => 18,
+        ) );
+        register_setting( 'wpb_catalog_group', 'wpb_cat_subtitle_color', array(
+            'sanitize_callback' => 'sanitize_hex_color',
+            'default'           => '#333333',
+        ) );
+        register_setting( 'wpb_catalog_group', 'wpb_cat_subtitle_align', array(
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'center',
+        ) );
+        register_setting( 'wpb_catalog_group', 'wpb_cat_bg_type', array(
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'white',
+        ) );
+        register_setting( 'wpb_catalog_group', 'wpb_cat_bg_color', array(
+            'sanitize_callback' => 'sanitize_hex_color',
+            'default'           => '#ffffff',
+        ) );
+        register_setting( 'wpb_catalog_group', 'wpb_cat_bg_image', array(
+            'sanitize_callback' => 'esc_url_raw',
+            'default'           => '',
+        ) );
+        register_setting( 'wpb_catalog_group', 'wpb_cat_btn_color', array(
+            'sanitize_callback' => 'sanitize_hex_color',
+            'default'           => '#dc3545',
+        ) );
+        register_setting( 'wpb_catalog_group', 'wpb_cat_btn_text', array(
+            'sanitize_callback' => 'sanitize_text_field',
+            'default'           => 'Filtrar',
+        ) );
+        register_setting( 'wpb_catalog_group', 'wpb_cat_btn_radius', array(
+            'sanitize_callback' => 'absint',
+            'default'           => 4,
+        ) );
+
     /**
      * Register plugin settings.
      */
@@ -1048,6 +1108,7 @@ class WP_Plugin_Booking {
             'sanitize_callback' => 'sanitize_hex_color',
             'default'           => '#444444',
         ) );
+        add_settings_section( 'wpb_catalog', __( 'Diseño de la Página de Catálogo', 'wp-plugin-booking' ), null, 'wpb-catalog' );
         register_setting( 'wpb_modal_group', 'wpb_desc_align', array(
             'sanitize_callback' => 'sanitize_text_field',
             'default'           => 'left',
@@ -1152,6 +1213,22 @@ class WP_Plugin_Booking {
             array( $this, 'contact_phone_field' ),
             'wpb-frontpage',
             'wpb_frontpage'
+
+        /* Catalog design tab fields */
+        add_settings_field( 'wpb_cat_title_text', __( 'Título', 'wp-plugin-booking' ), array( $this, 'cat_title_text_field' ), 'wpb-catalog', 'wpb_catalog' );
+        add_settings_field( 'wpb_cat_title_font', __( 'Fuente del título', 'wp-plugin-booking' ), array( $this, 'cat_title_font_field' ), 'wpb-catalog', 'wpb_catalog' );
+        add_settings_field( 'wpb_cat_title_size', __( 'Tamaño del título', 'wp-plugin-booking' ), array( $this, 'cat_title_size_field' ), 'wpb-catalog', 'wpb_catalog' );
+        add_settings_field( 'wpb_cat_title_color', __( 'Color del título', 'wp-plugin-booking' ), array( $this, 'cat_color_field' ), 'wpb-catalog', 'wpb_catalog', array( 'label_for' => 'wpb_cat_title_color', 'option' => 'wpb_cat_title_color' ) );
+        add_settings_field( 'wpb_cat_subtitle_text', __( 'Subtítulo', 'wp-plugin-booking' ), array( $this, 'cat_subtitle_text_field' ), 'wpb-catalog', 'wpb_catalog' );
+        add_settings_field( 'wpb_cat_subtitle_size', __( 'Tamaño subtítulo', 'wp-plugin-booking' ), array( $this, 'cat_subtitle_size_field' ), 'wpb-catalog', 'wpb_catalog' );
+        add_settings_field( 'wpb_cat_subtitle_color', __( 'Color subtítulo', 'wp-plugin-booking' ), array( $this, 'cat_color_field' ), 'wpb-catalog', 'wpb_catalog', array( 'label_for' => 'wpb_cat_subtitle_color', 'option' => 'wpb_cat_subtitle_color' ) );
+        add_settings_field( 'wpb_cat_subtitle_align', __( 'Alineación subtítulo', 'wp-plugin-booking' ), array( $this, 'cat_subtitle_align_field' ), 'wpb-catalog', 'wpb_catalog' );
+        add_settings_field( 'wpb_cat_bg_type', __( 'Fondo de página', 'wp-plugin-booking' ), array( $this, 'cat_bg_type_field' ), 'wpb-catalog', 'wpb_catalog' );
+        add_settings_field( 'wpb_cat_bg_color', __( 'Color de fondo', 'wp-plugin-booking' ), array( $this, 'cat_color_field' ), 'wpb-catalog', 'wpb_catalog', array( 'label_for' => 'wpb_cat_bg_color', 'option' => 'wpb_cat_bg_color' ) );
+        add_settings_field( 'wpb_cat_bg_image', __( 'Imagen de fondo', 'wp-plugin-booking' ), array( $this, 'cat_bg_image_field' ), 'wpb-catalog', 'wpb_catalog' );
+        add_settings_field( 'wpb_cat_btn_text', __( 'Texto del botón', 'wp-plugin-booking' ), array( $this, 'cat_btn_text_field' ), 'wpb-catalog', 'wpb_catalog' );
+        add_settings_field( 'wpb_cat_btn_color', __( 'Color del botón', 'wp-plugin-booking' ), array( $this, 'cat_color_field' ), 'wpb-catalog', 'wpb_catalog', array( 'label_for' => 'wpb_cat_btn_color', 'option' => 'wpb_cat_btn_color' ) );
+        add_settings_field( 'wpb_cat_btn_radius', __( 'Bordes del botón', 'wp-plugin-booking' ), array( $this, 'cat_btn_radius_field' ), 'wpb-catalog', 'wpb_catalog' );
         );
 
         add_settings_field(
@@ -1284,6 +1361,73 @@ class WP_Plugin_Booking {
         echo '<input type="text" name="wpb_include_header" value="' . esc_attr( $value ) . '" class="regular-text" />';
     }
 
+    /* Catalog design fields */
+    public function cat_title_text_field() {
+        $value = get_option( 'wpb_cat_title_text', '🌴 Paraíso Turístico' );
+        echo '<input type="text" id="wpb_cat_title_text" name="wpb_cat_title_text" value="' . esc_attr( $value ) . '" class="regular-text" />';
+    }
+
+    public function cat_title_font_field() {
+        $value = get_option( 'wpb_cat_title_font', 'Poppins' );
+        echo '<select id="wpb_cat_title_font" name="wpb_cat_title_font"><option value="Poppins"' . selected( $value, 'Poppins', false ) . '>Poppins</option><option value="Roboto"' . selected( $value, 'Roboto', false ) . '>Roboto</option><option value="Arial"' . selected( $value, 'Arial', false ) . '>Arial</option></select>';
+    }
+
+    public function cat_title_size_field() {
+        $value = absint( get_option( 'wpb_cat_title_size', 48 ) );
+        echo '<input type="number" id="wpb_cat_title_size" name="wpb_cat_title_size" value="' . esc_attr( $value ) . '" class="small-text" /> px';
+    }
+
+    public function cat_color_field( $args ) {
+        $option = isset( $args['option'] ) ? $args['option'] : '';
+        $value  = get_option( $option, '' );
+        echo '<input type="text" class="wp-color-picker-field" data-default-color="' . esc_attr( $value ) . '" id="' . esc_attr( $option ) . '" name="' . esc_attr( $option ) . '" value="' . esc_attr( $value ) . '" />';
+    }
+
+    public function cat_subtitle_text_field() {
+        $value = get_option( 'wpb_cat_subtitle_text', '' );
+        echo '<input type="text" id="wpb_cat_subtitle_text" name="wpb_cat_subtitle_text" value="' . esc_attr( $value ) . '" class="regular-text" />';
+    }
+
+    public function cat_subtitle_size_field() {
+        $value = absint( get_option( 'wpb_cat_subtitle_size', 18 ) );
+        echo '<input type="number" id="wpb_cat_subtitle_size" name="wpb_cat_subtitle_size" value="' . esc_attr( $value ) . '" class="small-text" /> px';
+    }
+
+    public function cat_subtitle_align_field() {
+        $value = get_option( 'wpb_cat_subtitle_align', 'center' );
+        echo '<select id="wpb_cat_subtitle_align" name="wpb_cat_subtitle_align"><option value="left"' . selected( $value, 'left', false ) . '>' . esc_html__( 'Izquierda', 'wp-plugin-booking' ) . '</option><option value="center"' . selected( $value, 'center', false ) . '>' . esc_html__( 'Centrado', 'wp-plugin-booking' ) . '</option><option value="right"' . selected( $value, 'right', false ) . '>' . esc_html__( 'Derecha', 'wp-plugin-booking' ) . '</option></select>';
+    }
+
+    public function cat_bg_type_field() {
+        $value = get_option( 'wpb_cat_bg_type', 'white' );
+        echo '<select id="wpb_cat_bg_type" name="wpb_cat_bg_type"><option value="white"' . selected( $value, 'white', false ) . '>' . esc_html__( 'Blanco', 'wp-plugin-booking' ) . '</option><option value="color"' . selected( $value, 'color', false ) . '>' . esc_html__( 'Color personalizado', 'wp-plugin-booking' ) . '</option><option value="image"' . selected( $value, 'image', false ) . '>' . esc_html__( 'Imagen', 'wp-plugin-booking' ) . '</option></select>';
+    }
+
+    public function cat_bg_image_field() {
+        $value = get_option( 'wpb_cat_bg_image', '' );
+        echo '<input type="text" id="wpb_cat_bg_image" name="wpb_cat_bg_image" value="' . esc_attr( $value ) . '" class="regular-text" /> <button type="button" class="button wpb-select-image" data-target="wpb_cat_bg_image">' . esc_html__( 'Seleccionar', 'wp-plugin-booking' ) . '</button>';
+    }
+
+    public function cat_btn_text_field() {
+        $value = get_option( 'wpb_cat_btn_text', 'Filtrar' );
+        echo '<input type="text" id="wpb_cat_btn_text" name="wpb_cat_btn_text" value="' . esc_attr( $value ) . '" class="regular-text" />';
+    }
+
+    public function cat_btn_radius_field() {
+        $value = absint( get_option( 'wpb_cat_btn_radius', 4 ) );
+        echo '<input type="number" id="wpb_cat_btn_radius" name="wpb_cat_btn_radius" value="' . esc_attr( $value ) . '" class="small-text" /> px';
+    }
+
+        echo '<a href="?page=wpb-settings&tab=catalog" class="nav-tab' . ( 'catalog' === $tab ? ' nav-tab-active' : '' ) . '">' . esc_html__( 'Diseño del Catálogo', 'wp-plugin-booking' ) . '</a>';
+        } elseif ( 'catalog' === $tab ) {
+            settings_fields( 'wpb_catalog_group' );
+            $default_btn = esc_html__( 'Filtrar', 'wp-plugin-booking' );
+            echo '<div id="wpb-catalog-preview" style="padding:20px;border:1px solid #ddd;margin-bottom:20px;">'
+                . '<h2 class="preview-title" style="margin:0 0 10px;"></h2>'
+                . '<p class="preview-subtitle" style="margin:0 0 10px;"></p>'
+                . '<button type="button" class="button preview-btn">' . $default_btn . '</button>'
+                . '</div>';
+            do_settings_sections( 'wpb-catalog' );
     public function modal_padding_field() {
         $value = absint( get_option( 'wpb_include_padding', 15 ) );
         echo '<input type="number" name="wpb_include_padding" value="' . esc_attr( $value ) . '" class="small-text" /> px';
@@ -1579,8 +1723,9 @@ class WP_Plugin_Booking {
         echo '<div class="wrap">';
         echo '<h1>' . esc_html__( 'Estadisticas', 'wp-plugin-booking' ) . '</h1>';
 
-        echo '<form method="get" class="wpb-stats-filter">';
-        echo '<input type="hidden" name="page" value="wpb-stats" />';
+        // Media selector for services and settings preview.
+        if ( ( in_array( $hook, array( 'post.php', 'post-new.php' ), true ) && $screen && 'wpb_service' === $screen->post_type ) ||
+            ( $screen && 'wpbookingstandar_page_wpb-settings' === $screen->id ) ) {
         echo '<label>' . esc_html__( 'Desde', 'wp-plugin-booking' ) . ' <input type="date" name="from" value="' . esc_attr( $from ) . '" /></label> ';
         echo '<label>' . esc_html__( 'Hasta', 'wp-plugin-booking' ) . ' <input type="date" name="to" value="' . esc_attr( $to ) . '" /></label> ';
         echo '<label>' . esc_html__( 'Servicio', 'wp-plugin-booking' ) . ' '; 
@@ -1681,6 +1826,42 @@ class WP_Plugin_Booking {
         $size     = absint( get_option( 'wpb_modal_font_size', 16 ) );
         $txt      = sanitize_hex_color( get_option( 'wpb_modal_text_color', '#444444' ) );
         $title    = sanitize_hex_color( get_option( 'wpb_modal_title_color', '#000000' ) );
+    /**
+     * Generate inline CSS for catalog design customization.
+     */
+    private function generate_catalog_css() {
+        $title_font = get_option( 'wpb_cat_title_font', 'Poppins' );
+        $title_size = absint( get_option( 'wpb_cat_title_size', 48 ) );
+        $title_color= sanitize_hex_color( get_option( 'wpb_cat_title_color', '#000000' ) );
+        $sub_size   = absint( get_option( 'wpb_cat_subtitle_size', 18 ) );
+        $sub_color  = sanitize_hex_color( get_option( 'wpb_cat_subtitle_color', '#333333' ) );
+        $sub_align  = sanitize_text_field( get_option( 'wpb_cat_subtitle_align', 'center' ) );
+        $bg_type    = get_option( 'wpb_cat_bg_type', 'white' );
+        $bg_color   = sanitize_hex_color( get_option( 'wpb_cat_bg_color', '#ffffff' ) );
+        $bg_image   = esc_url_raw( get_option( 'wpb_cat_bg_image', '' ) );
+        $btn_color  = sanitize_hex_color( get_option( 'wpb_cat_btn_color', '#dc3545' ) );
+        $btn_radius = absint( get_option( 'wpb_cat_btn_radius', 4 ) );
+
+        $css  = ":root{";
+        $css .= "--wpb-cat-title-font:'" . esc_attr( $title_font ) . "',sans-serif;";
+        $css .= "--wpb-cat-title-size:" . $title_size . "px;";
+        $css .= "--wpb-cat-title-color:$title_color;";
+        $css .= "--wpb-cat-sub-size:" . $sub_size . "px;";
+        $css .= "--wpb-cat-sub-color:$sub_color;";
+        $css .= "--wpb-cat-sub-align:$sub_align;";
+        $css .= "--wpb-cat-btn-color:$btn_color;";
+        $css .= "--wpb-cat-btn-radius:" . $btn_radius . "px;";
+        if ( 'color' === $bg_type ) {
+            $css .= "--wpb-cat-bg:$bg_color;";
+        } elseif ( 'image' === $bg_type && $bg_image ) {
+            $css .= "--wpb-cat-bg:url($bg_image);";
+        } else {
+            $css .= "--wpb-cat-bg:#ffffff;";
+        }
+        $css .= "}";
+        return $css;
+    }
+
         $bg       = sanitize_hex_color( get_option( 'wpb_modal_bg_color', '#ffffff' ) );
         $border   = sanitize_hex_color( get_option( 'wpb_modal_border_color', '#dc3545' ) );
         $next     = sanitize_hex_color( get_option( 'wpb_modal_next_color', '#dc3545' ) );
