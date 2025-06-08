@@ -79,12 +79,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  text-align: center;
-}
 
-.wpb-catalog-search form {
-  max-width: 600px;
-  margin: 0 auto;
 }
 
 .btn-danger {
@@ -299,6 +294,7 @@
   font-weight: 300;
   animation: fadeInUp 1s ease 0.3s both;
 }
+
 .stat-card {
   background: linear-gradient(135deg,#ffffff 0%,#f3f8ff 100%);
   border:2px solid #e1f5fe;
