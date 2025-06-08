@@ -1,0 +1,27 @@
+name: Auto Merge to Main
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # necesario para poder hacer merge correctamente
+
+      - name: Configurar Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Hacer merge a main automáticamente
+        run: |
+          git checkout main
+          git pull origin main
+          git merge ${{ github.ref_name }} --strategy-option ours -m "Merge automático desde ${{ github.ref_name }}"
+          git push origin main
