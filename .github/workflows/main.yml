@@ -1,4 +1,4 @@
-name: Auto Merge to Main
+name: Merge inteligente a main
 
 on:
   push:
@@ -6,22 +6,35 @@ on:
       - main
 
 jobs:
-  auto-merge:
+  smart-merge:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout código
+      - name: Checkout completo
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # necesario para poder hacer merge correctamente
+          fetch-depth: 0
 
       - name: Configurar Git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Hacer merge a main automáticamente
+      - name: Intentar merge normal
+        id: merge
+        continue-on-error: true
         run: |
           git checkout main
           git pull origin main
-          git merge ${{ github.ref_name }} --strategy-option ours -m "Merge automático desde ${{ github.ref_name }}"
+          git merge origin/${{ github.ref_name }}
+
+      - name: Resolver conflicto usando estrategia 'ours'
+        if: steps.merge.outcome == 'failure'
+        run: |
+          echo "Conflicto detectado. Aplicando estrategia: mantener cambios nuevos."
+          git merge origin/${{ github.ref_name }} --strategy=ours -m "Auto merge forzoso desde ${{ github.ref_name }}"
+          git push origin main
+
+      - name: Push final si no hubo conflictos
+        if: steps.merge.outcome == 'success'
+        run: |
           git push origin main
