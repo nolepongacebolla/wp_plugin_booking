@@ -34,10 +34,22 @@
   --wpb-checkbox-bg: #ffffff;
   --wpb-checkbox-font-style: normal;
   --wpb-checkbox-font-weight: normal;
+
+  /* Catalog design variables */
+  --wpb-cat-title-font: 'Poppins', sans-serif;
+  --wpb-cat-title-size: 48px;
+  --wpb-cat-title-color: #000000;
+  --wpb-cat-sub-size: 18px;
+  --wpb-cat-sub-color: #333333;
+  --wpb-cat-sub-align: center;
+  --wpb-cat-bg: #ffffff;
+  --wpb-cat-btn-color: #dc3545;
+  --wpb-cat-btn-radius: 4px;
 }
 
 .wpb-catalog-page {
-  background: #ffffff;
+  background: var(--wpb-cat-bg);
+
   color: #333;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   line-height: 1.6;
@@ -79,13 +91,20 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  text-align: center;
+}
 
+.wpb-catalog-search form {
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .btn-danger {
-  background: var(--wpb-primary);
-  border-color: var(--wpb-primary);
+  background: var(--wpb-cat-btn-color);
+  border-color: var(--wpb-cat-btn-color);
   color: var(--wpb-light);
+  border-radius: var(--wpb-cat-btn-radius);
+
 }
 .btn-danger:hover {
   background: var(--wpb-accent);
@@ -268,7 +287,7 @@
 
 /* Hero header and premium styles from sample template */
 .wpb-catalog-page {
-  background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 50%, #fff5e6 100%);
+  background: var(--wpb-cat-bg);
   min-height: 100vh;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #2c3e50;
@@ -278,20 +297,23 @@
   text-align: center;
   padding: 4rem 5%;
   color: #2c3e50;
-  background: #f8f9fa;
+  background: var(--wpb-cat-bg);
 }
 .hero-title {
-  font-size: 3rem;
+  font-size: var(--wpb-cat-title-size);
+  font-family: var(--wpb-cat-title-font);
+  color: var(--wpb-cat-title-color);
   margin-bottom: 1rem;
   font-weight: 300;
   letter-spacing: 2px;
   animation: fadeInUp 1s ease;
 }
 .hero-subtitle {
-  font-size: 1.1rem;
+  font-size: var(--wpb-cat-sub-size);
+  color: var(--wpb-cat-sub-color);
   margin-bottom: 2rem;
-  opacity: 0.7;
   font-weight: 300;
+  text-align: var(--wpb-cat-sub-align);
   animation: fadeInUp 1s ease 0.3s both;
 }
 
